@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "Guide-bot"
-description = ""
+name = "Guide bot"
+description = "Бот для арт-медитации по объектам уличного искусства в Ростове-на-Дону"
 version = "0.1.0"
-authors = []
+authors = ["dcomrad", "danlaryushin", "GUSICATC", "SergeychUK92", "STI-xa", "94R1K"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
