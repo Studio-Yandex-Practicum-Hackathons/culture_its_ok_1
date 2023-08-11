@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "Guide-bot"
+description = ""
+version = "0.1.0"
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^1.10.12"
+python-telegram-bot = "^20.4"
+
+[tool.poetry.group.dev.dependencies]
+python = "^3.10"
+isort = "^5.12.0"
+pre-commit = "^3.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
