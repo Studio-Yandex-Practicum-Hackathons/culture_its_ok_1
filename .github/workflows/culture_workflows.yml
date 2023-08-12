@@ -18,6 +18,7 @@ jobs:
           python-version: 3.7
       - name: Install dependencis
         run: |
+          pip install poetry
           poetry install
           poetry add flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
       - name: Test with flake8 and django tests
