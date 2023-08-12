@@ -24,4 +24,4 @@ jobs:
       - name: Test with flake8 
         run: |
           # запуск проверки проекта по flake8
-          python3 -m flake8
+          python -m flake8
