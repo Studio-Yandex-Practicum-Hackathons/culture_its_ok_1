@@ -7,22 +7,24 @@ jobs:
   Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Install Python
-        uses: actions/setup-python@v4
-      - name: Install poetry
-        run: pip install poetry  
-      - name: Setup a local virtual environment (if no poetry.toml file)
-        run: |
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+    - name: Install poetry
+      run: pip install poetry  
+    - name: Setup a local virtual environment (if no poetry.toml file)
+      run: |
           poetry config virtualenvs.create true --local
           poetry config virtualenvs.in-project true --local
-      - uses: actions/cache@v3
-        name: Define a cache for the virtual environment based on the dependencies lock file
-        with:
+    - uses: actions/cache@v3
+      name: Define a cache for the virtual environment based on the dependencies lock file
+      with:
           path: ./.venv
           key: venv-${{ hashFiles('poetry.lock') }}
-      - name: Install the project dependencies
-        run: poetry install    
-      - name: Run the automated tests
-        run: poetry run flake8
-             
+    - name: Install the project dependencies
+      run: poetry install    
+    - name: Run the automated tests
+      run: poetry add flake8
+           poetry run flake8
