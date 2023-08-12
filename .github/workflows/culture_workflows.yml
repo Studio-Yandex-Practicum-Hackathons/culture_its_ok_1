@@ -1,0 +1,26 @@
+name: Tests
+
+on:
+
+  push:
+    branches: [ "feature/workflows_for_develop" ]
+
+  workflow_dispatch:
+
+jobs:
+    tests:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencis
+        run: |
+          poetry install
+          poetry add flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
+      - name: Test with flake8 and django tests
+        run: |
+          # запуск проверки проекта по flake8
+          python -m flake8
