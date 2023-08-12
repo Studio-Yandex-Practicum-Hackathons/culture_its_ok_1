@@ -11,8 +11,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
       - name: Install poetry
-        run: pip install poetry
-             pip wheel --use-pep517 "run (==0.2)"
+        run: pip install poetry  
       - name: Setup a local virtual environment (if no poetry.toml file)
         run: |
           poetry config virtualenvs.create true --local
@@ -24,6 +23,7 @@ jobs:
           key: venv-${{ hashFiles('poetry.lock') }}
       - name: Install the project dependencies
         run: poetry install
+             pip wheel --use-pep517 "run (==0.2)"
       - name: Run the automated tests
         run: poetry add flake8
              poetry run flake8
