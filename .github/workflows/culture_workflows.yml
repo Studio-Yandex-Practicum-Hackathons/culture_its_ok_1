@@ -1,27 +1,27 @@
 name: Tests
-
 on:
-
   push:
     branches: [ "feature/workflows_for_develop" ]
-
   workflow_dispatch:
-
 jobs:
-    tests:
-      runs-on: ubuntu-latest
-      steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+      - name: Setup a local virtual environment (if no poetry.toml file)
+        run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+      - uses: actions/cache@v3
+        name: Define a cache for the virtual environment based on the dependencies lock file
         with:
-          python-version: 3.10.12
-      - name: Install dependencis
-        run: |
-          pip install poetry
-          poetry install
-          poetry add flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
-      - name: Test with flake8 
-        run: |
-          # запуск проверки проекта по flake8
-          python3 -m flake8
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+      - name: Install the project dependencies
+        run: poetry install
+      - name: Run the automated tests (for example)
+        run: poetry run -m flake8
