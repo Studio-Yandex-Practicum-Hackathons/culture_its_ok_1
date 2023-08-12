@@ -24,4 +24,5 @@ jobs:
       - name: Install the project dependencies
         run: poetry install
       - name: Run the automated tests
+        run: poetry add flake8
         run: poetry run flake8
