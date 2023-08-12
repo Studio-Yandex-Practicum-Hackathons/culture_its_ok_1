@@ -11,7 +11,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
       - name: Install poetry
-        uses: abatilo/actions-poetry@v2
+        uses: pip install poetry
       - name: Setup a local virtual environment (if no poetry.toml file)
         run: |
           poetry config virtualenvs.create true --local
@@ -25,4 +25,4 @@ jobs:
         run: poetry install
       - name: Run the automated tests
         run: poetry add flake8
-             poetry run -m flake8
+             poetry run flake8
