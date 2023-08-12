@@ -4,7 +4,7 @@ on:
     branches: [ "feature/workflows_for_develop" ]
   workflow_dispatch:
 jobs:
-  ci:
+  Tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,4 +25,4 @@ jobs:
         run: poetry install
       - name: Run the automated tests
         run: poetry add flake8
-             poetry run flake8
+             poetry run -m flake8
