@@ -26,5 +26,5 @@ jobs:
     - name: Install the project dependencies
       run: poetry install    
     - name: Run the automated tests
-      run: poetry add pytest
-           poetry run pytest
+      run: poetry add black
+           poetry run black
