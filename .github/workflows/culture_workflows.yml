@@ -20,9 +20,8 @@ jobs:
         run: |
           pip install poetry
           poetry install
-          poetry shell
-          poetry add flake8
-      - name: Test with flake8
+          poetry add flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
+      - name: Test with flake8 
         run: |
           # запуск проверки проекта по flake8
           python3 -m flake8
