@@ -28,5 +28,5 @@ jobs:
     - name: Add the automated tests
       run: poetry add flake8
     - name: Run the automated tests
-      run: poetry run flake8
+      run: poetry run flake8 --exclude patterns '.venv'
            
