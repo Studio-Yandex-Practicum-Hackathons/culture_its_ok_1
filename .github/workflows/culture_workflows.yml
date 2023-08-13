@@ -25,8 +25,8 @@ jobs:
           key: venv-${{ hashFiles('poetry.lock') }}
     - name: Install the project dependencies
       run: poetry install    
-    - name: Add the automated tests
+    - name: Add flake8 package
       run: poetry add flake8
-    - name: Run the automated tests
+    - name: Run the flake8 tests
       run: poetry run flake8
            
