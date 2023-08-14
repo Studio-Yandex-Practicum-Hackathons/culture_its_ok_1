@@ -25,7 +25,7 @@ jobs:
           key: venv-${{ hashFiles('poetry.lock') }}
     - name: Install the project dependencies
       run: poetry install    
-    - name: Add flake8 package
+    - name: Add required packages
       run: |
           poetry add flake8
           poetry add flake8-blind-except
@@ -37,4 +37,5 @@ jobs:
     - name: Run the tests
       run: | 
           poetry run flake8
+          poetry run pep8-naming
           poetry run python -m isort . -c
