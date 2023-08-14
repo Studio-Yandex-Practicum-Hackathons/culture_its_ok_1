@@ -26,13 +26,20 @@ jobs:
     - name: Install the project dependencies
       run: poetry install    
     - name: Add flake8 package
-      run: poetry add flake8
-    - name: Run the flake8 tests
+      run: |
+          poetry add flake8
+          poetry add flake8-blind-except
+          poetry add flake8-broken-line
+          poetry add flake8-return
+          poetry add flake8-variables-names
+          poetry add pep8-naming
+          poetry add isort
+    - name: Run the tests
       run: | 
           poetry run flake8
           poetry run flake8-blind-except
-          poetry flake8-broken-line
-          poetry flake8-return
-          poetry flake8-variables-names
-          poetry pep8-naming
-          poetry isort -с
+          poetry run flake8-broken-line
+          poetry run flake8-return
+          poetry run flake8-variables-names
+          poetry run pep8-naming
+          poetry run isort -с
