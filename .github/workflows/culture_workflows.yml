@@ -37,7 +37,6 @@ jobs:
     - name: Run the tests
       run: | 
           poetry run flake8
-          poetry run flake8-blind-except
           poetry run flake8-broken-line
           poetry run flake8-return
           poetry run flake8-variables-names
