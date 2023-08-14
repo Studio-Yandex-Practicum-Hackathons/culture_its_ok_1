@@ -1,7 +1,7 @@
 name: Tests
 on:
   push:
-    branches: [ "feature/workflows_for_develop" ]
+    branches: [ "develop" ]
   workflow_dispatch:
 jobs:
   Tests:
