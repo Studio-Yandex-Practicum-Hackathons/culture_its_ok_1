@@ -28,5 +28,11 @@ jobs:
     - name: Add flake8 package
       run: poetry add flake8
     - name: Run the flake8 tests
-      run: poetry run flake8
-           
+      run: | 
+          poetry run flake8
+          poetry run flake8-blind-except
+          poetry flake8-broken-line
+          poetry flake8-return
+          poetry flake8-variables-names
+          poetry pep8-naming
+          poetry isort -с
