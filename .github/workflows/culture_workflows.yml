@@ -36,6 +36,5 @@ jobs:
           poetry add isort
     - name: Run the tests
       run: | 
-          poetry run flake8
-          poetry run pep8-naming
+          poetry run python -m flake8
           poetry run python -m isort . -c
