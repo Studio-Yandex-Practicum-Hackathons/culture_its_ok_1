@@ -6,11 +6,11 @@ services:
     restart: always
     container_name: postgres
     environment:
-      DB_NAME = ${DB_NAME}
-      POSTGRES_USER = ${POSTGRES_USER}
-      POSTGRES_PASSWORD = ${POSTGRES_PASSWORD}
-      DB_HOST = ${DB_HOST}
-      DB_PORT = ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
     expose: 
       - ${POSTGRES_PORT}
     volumes:
