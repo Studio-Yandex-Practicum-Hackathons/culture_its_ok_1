@@ -1,1 +1,1 @@
-SENTRY_DSN='https://d7c188f6ae242cb58cc7b412c045f020@o4504547686678528.ingest.sentry.io/4505710238236672'
+SENTRY_DSN=<sentry dsn>
