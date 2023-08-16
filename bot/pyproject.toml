@@ -6,8 +6,9 @@ authors = ["dcomrad", "danlaryushin", "GUSICATC", "SergeychUK92", "STI-xa", "94R
 
 [tool.poetry.dependencies]
 python = "^3.10"
-pydantic = "^1.10.12"
-python-telegram-bot = "^20.4"
+pydantic = "2.1.1"
+pydantic-settings = "^2.0.3"
+aiogram = "3.0.0rc1"
 
 [tool.poetry.group.dev.dependencies]
 python = "^3.10"
