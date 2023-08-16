@@ -1,4 +1,10 @@
+from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
+
+SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
 
 
 class GoogleReport:
@@ -11,7 +17,9 @@ class GoogleReport:
         self.columns = 0
 
     def auth(self):
-        service = discovery.build("sheets", "v4", credentials=self.credentials)
+        credentials = Credentials.from_service_account_info(
+            info=self.credentials, scopes=SCOPES)
+        service = discovery.build("sheets", "v4", credentials=credentials)
         return service
 
     def add_title(self, title):
