@@ -16,18 +16,5 @@ services:
       - ./env/.general
       - ./env/.postgres
 
-  bot:
-    build: ../bot
-    container_name: culture-bot
-    restart: on-failure
-    depends_on:
-      - postgres
-    entrypoint: /app/docker-entrypoint.sh
-    env_file:
-      - ./env/.general
-      - ./env/.bot
-      - ./env/.postgres
-      - ./env/.sentry
-
 volumes:
   culture_postgresql_data:
