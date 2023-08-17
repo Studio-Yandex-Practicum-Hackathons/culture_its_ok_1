@@ -1,5 +1,6 @@
 import os
 import pathlib
+import logging
 from pathlib import Path
 
 import sentry_sdk
@@ -41,6 +42,9 @@ class LoggingSettings(EnvBase):
     log_format: str = '"%(asctime)s - [%(levelname)s] - %(message)s"'
     dt_format: str = '%d.%m.%Y %H:%M:%S'
     log_level: str
+
+    def init_global_logging_level(self):
+        logging.basicConfig(level=getattr(logging, self.log_level))
 
 
 class Settings(BaseSettings):
