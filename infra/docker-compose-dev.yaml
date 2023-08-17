@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  postgres: 
+    image: postgres:${POSTGRES_VERSION}
+    container_name: culture-postgres
+    restart: on-failure
+    hostname: ${POSTGRES_HOST}
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    expose:
+      - ${POSTGRES_PORT}
+    volumes:
+      - culture_postgresql_data:/var/lib/postgresql/data/
+    env_file:
+      - ./env/.general
+      - ./env/.postgres
+
+  bot:
+    build: ../bot
+    container_name: culture-bot
+    restart: on-failure
+    depends_on:
+      - postgres
+    entrypoint: /app/docker-entrypoint.sh
+    env_file:
+      - ./env/.general
+      - ./env/.bot
+      - ./env/.postgres
+      - ./env/.sentry
+
+volumes:
+  culture_postgresql_data:
