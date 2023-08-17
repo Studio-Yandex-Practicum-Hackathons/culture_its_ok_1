@@ -1,8 +1,8 @@
 import asyncio
 
+from aiogram import Bot, Dispatcher
 from core.config import settings
 from core.logger import log_dec, logger_factory
-from aiogram import Bot, Dispatcher
 from handlers import start_router
 
 
