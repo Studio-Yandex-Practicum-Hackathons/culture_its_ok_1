@@ -5,7 +5,6 @@ from logging.handlers import RotatingFileHandler
 from sys import stdout
 
 import sentry_sdk
-
 from core.config import settings
 
 
