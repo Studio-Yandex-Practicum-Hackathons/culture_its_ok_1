@@ -1,5 +1,5 @@
-from aiogram.filters.command import Command
 from aiogram import Router, types
+from aiogram.filters.command import Command
 from core.logger import log_dec, logger_factory
 
 router = Router()
