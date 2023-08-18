@@ -78,8 +78,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('object_priority', models.IntegerField(verbose_name='Приоритет')),
-                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.object', verbose_name='Объект')),
-                ('route', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.route', verbose_name='Маршрут')),
+                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.object', verbose_name='Объект')),
+                ('route', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.route', verbose_name='Маршрут')),
             ],
             options={
                 'verbose_name': 'Путь к объекту',
@@ -93,9 +93,9 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('type', models.CharField(choices=[('text', 'Текст'), ('voice', 'Голос')], max_length=10, verbose_name='Тип')),
                 ('content', models.TextField(verbose_name='Контент')),
-                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.object', verbose_name='Объект')),
-                ('route', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.route', verbose_name='Путь')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.user', verbose_name='Пользователь')),
+                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.object', verbose_name='Объект')),
+                ('route', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.route', verbose_name='Путь')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.user', verbose_name='Пользователь')),
             ],
             options={
                 'verbose_name': 'Рефлексия',
@@ -108,9 +108,9 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('started_at', models.DateTimeField(auto_now_add=True, verbose_name='Время начала')),
                 ('finished_at', models.DateTimeField(blank=True, null=True, verbose_name='Время конца')),
-                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.object', verbose_name='Объект')),
-                ('route', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.route', verbose_name='Путь')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.user', verbose_name='Пользователь')),
+                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.object', verbose_name='Объект')),
+                ('route', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.route', verbose_name='Путь')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.user', verbose_name='Пользователь')),
             ],
             options={
                 'verbose_name': 'Прогресс пользователя',
@@ -123,8 +123,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('step_priority', models.IntegerField(verbose_name='Приоритет шага')),
-                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.object', verbose_name='Объект')),
-                ('step', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture_db.step', verbose_name='Шаг')),
+                ('object', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.object', verbose_name='Объект')),
+                ('step', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='culture.step', verbose_name='Шаг')),
             ],
             options={
                 'verbose_name': 'Шаг к объекту',

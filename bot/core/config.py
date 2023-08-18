@@ -14,7 +14,7 @@ LOG_DIR: str = 'logs'
 
 class EnvBase(BaseSettings):
     class Config:
-        env_file = None if IN_DOCKER else 'core/.env'
+        env_file = None if IN_DOCKER else '.env'
         extra = Extra.allow
 
 
