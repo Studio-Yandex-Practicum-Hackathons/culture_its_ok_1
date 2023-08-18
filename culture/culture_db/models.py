@@ -35,11 +35,6 @@ class Step(models.Model):
         ('continue_button', 'Кнопка продолжить'),
     ]
 
-    route = models.ForeignKey(
-        Route,
-        on_delete=models.CASCADE,
-        verbose_name='Маршрут шага'
-    )
     type = models.CharField(
         max_length=20,
         choices=TYPE_CHOICES,
@@ -60,14 +55,24 @@ class Step(models.Model):
         ordering = ('-pk',)
 
     def __str__(self):
-        return self.type
+        return self.content[:10]
 
 
 class Object(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название')
-    author = models.CharField(max_length=255, verbose_name='Автор')
+    author = models.CharField(
+        max_length=255,
+        verbose_name='Автор',
+        blank=True,
+        null=True
+    )
     address = models.CharField(max_length=255, verbose_name='Адрес')
-    how_to_get = models.TextField(verbose_name='Как добраться')
+    how_to_get = models.TextField(
+        verbose_name='Как добраться',
+        blank=True,
+        null=True
+    )
+    is_active = models.BooleanField(default=True, verbose_name='Активно')
 
     class Meta:
         verbose_name = 'Объект'
@@ -90,11 +95,11 @@ class RouteObject(models.Model):
         verbose_name='Объект'
     )
     object_priority = models.IntegerField(verbose_name='Приоритет')
-    is_active = models.BooleanField(default=True, verbose_name='Активно')
 
     class Meta:
         verbose_name = 'Путь к объекту'
         verbose_name_plural = 'Пути к объектам'
+        ordering = ('-object_priority',)
 
     def __str__(self):
         return self.route.name

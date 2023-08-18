@@ -1,8 +1,13 @@
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-2zh8jk*pn6!#o2*ppuwzb_6(%_j3it#zob2jo_$lqt7cibcvbh'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
@@ -50,12 +55,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'culture.wsgi.application'
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'culture_db',
+            'USER': 'db_user',
+            'PASSWORD': '1234567',
+            'HOST': 'postgres',
+            'PORT': '5432'
+        }
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -83,7 +100,11 @@ USE_L10N = True
 USE_TZ = True
 
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
