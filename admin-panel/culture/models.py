@@ -77,7 +77,7 @@ class Object(models.Model):
     class Meta:
         verbose_name = 'Объект'
         verbose_name_plural = 'Объекты'
-        ordering = ('-name',)
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -99,7 +99,7 @@ class RouteObject(models.Model):
     class Meta:
         verbose_name = 'Путь к объекту'
         verbose_name_plural = 'Пути к объектам'
-        ordering = ('-object_priority',)
+        ordering = ('object_priority',)
 
     def __str__(self):
         return self.route.name
@@ -121,7 +121,7 @@ class ObjectStep(models.Model):
     class Meta:
         verbose_name = 'Шаг к объекту'
         verbose_name_plural = 'Шаги к объектам'
-        ordering = ('-step_priority',)
+        ordering = ('step_priority',)
 
     def __str__(self):
         return self.object.name
