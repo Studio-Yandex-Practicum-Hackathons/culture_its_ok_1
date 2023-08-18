@@ -2,8 +2,10 @@ import re
 
 from aiogram import F, Router, types
 from aiogram.fsm import context
+
 from core.logger import log_dec, logger_factory
 from dummy_db import USERS
+from keyboards.keyboards import route_select
 from states import NewUser, Route
 from utils import send_message_and_sleep
 
@@ -53,5 +55,8 @@ async def age_input(message: types.Message, state: context.FSMContext):
         message,
         f'{USERS[message.from_user.id]["name"]}, приятно познакомиться.'
     )
-    await message.answer('Пожалуйста, выберите маршрут')
+    await message.answer(
+        'Пожалуйста, выберите маршрут',
+        reply_markup=route_select(),
+    )
     await state.set_state(Route.route_selection)
