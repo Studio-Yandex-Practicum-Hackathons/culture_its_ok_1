@@ -1,8 +1,16 @@
 FROM python:3.10
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+ENV UWSGI_PROCESSES 1
+ENV UWSGI_THREADS 16
+ENV UWSGI_HARAKIRI 240
+
+ENV DJANGO_SETTINGS_MODULE 'config.settings'
+
 ENV WORKDIR /app
-ENV USER bot
-ENV AM_I_IN_A_DOCKER_CONTAINER YES
+ENV USER admin
 
 WORKDIR $WORKDIR
 
@@ -15,10 +23,14 @@ RUN apt-get update && \
     poetry config virtualenvs.create false && \
     poetry install --without dev
 
-RUN groupadd -r $USER && \
+RUN mkdir -p $WORKDIR/static/ && \
+    mkdir -p $WORKDIR/media/ && \
+    groupadd -r $USER && \
     useradd -d $WORKDIR -r -g $USER $USER && \
     chown $USER:$USER -R $WORKDIR && \
     chmod +x docker-entrypoint.sh
+
+EXPOSE 8000
 
 USER $USER
 
