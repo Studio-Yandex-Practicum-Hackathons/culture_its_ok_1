@@ -35,7 +35,7 @@ class Step(models.Model):
         ('continue_button', 'Кнопка продолжить'),
     ]
 
-    type = models.CharField(
+    type = models.CharField(  # noqa: VNE003
         max_length=20,
         choices=TYPE_CHOICES,
         verbose_name='Тип шага'
@@ -89,7 +89,7 @@ class RouteObject(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Маршрут'
     )
-    object = models.ForeignKey(
+    object = models.ForeignKey(  # noqa: VNE003
         Object,
         on_delete=models.CASCADE,
         verbose_name='Объект'
@@ -106,7 +106,7 @@ class RouteObject(models.Model):
 
 
 class ObjectStep(models.Model):
-    object = models.ForeignKey(
+    object = models.ForeignKey(  # noqa: VNE003
         Object,
         on_delete=models.CASCADE,
         verbose_name='Объект'
@@ -154,7 +154,7 @@ class Progress(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Путь'
     )
-    object = models.ForeignKey(
+    object = models.ForeignKey(  # noqa: VNE003
         Object,
         on_delete=models.CASCADE,
         verbose_name='Объект'
@@ -194,12 +194,12 @@ class Reflection(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Путь'
     )
-    object = models.ForeignKey(
+    object = models.ForeignKey(  # noqa: VNE003
         Object,
         on_delete=models.CASCADE,
         verbose_name='Объект'
     )
-    type = models.CharField(
+    type = models.CharField(  # noqa: VNE003
         max_length=10,
         choices=TYPE_CHOICES,
         verbose_name='Тип'
