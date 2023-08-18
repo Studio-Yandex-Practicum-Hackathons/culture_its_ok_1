@@ -1,5 +1,6 @@
-from aiogram import types
 from asyncio import sleep
+
+from aiogram import types
 
 
 async def send_message_and_sleep(

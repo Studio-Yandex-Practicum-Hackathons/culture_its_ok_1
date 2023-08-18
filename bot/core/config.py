@@ -1,6 +1,6 @@
+import logging
 import os
 import pathlib
-import logging
 from pathlib import Path
 
 import sentry_sdk

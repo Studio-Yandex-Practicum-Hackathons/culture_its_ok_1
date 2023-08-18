@@ -1,9 +1,9 @@
 import asyncio
 
+from aiogram import Bot, Dispatcher
 from core.config import settings
 from core.logger import log_dec, logger_factory
-from aiogram import Bot, Dispatcher
-from handlers import start_router, new_user_router
+from handlers import new_user_router, start_router
 
 
 @log_dec(logger=logger_factory(__name__))

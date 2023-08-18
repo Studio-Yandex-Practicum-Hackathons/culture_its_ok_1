@@ -39,7 +39,7 @@ def log_dec(logger: logging.Logger):
         async def wrapper(*args, **kwargs):
             try:
                 return await func(*args, **kwargs)
-            except Exception as exception:  # noqa
+            except Exception as exception:  # noqa: B902
                 logger.exception(msg=f'Исключение в функции {func.__name__}')
                 sentry_sdk.capture_exception(exception)
                 raise

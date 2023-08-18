@@ -1,9 +1,10 @@
-from aiogram import Router, types, F
-from core.logger import log_dec, logger_factory
-from aiogram.fsm import context
-from states import NewUser, Route
 import re
+
+from aiogram import F, Router, types
+from aiogram.fsm import context
+from core.logger import log_dec, logger_factory
 from dummy_db import USERS
+from states import NewUser, Route
 from utils import send_message_and_sleep
 
 router = Router()
@@ -32,7 +33,7 @@ async def name_input(message: types.Message, state: context.FSMContext):
 
 @router.message(NewUser.age_input, F.text)
 @log_dec(logger)
-async def name_input(message: types.Message, state: context.FSMContext):
+async def age_input(message: types.Message, state: context.FSMContext):
     if (
         not message.text.isdecimal() or
         message.text.isdecimal() and

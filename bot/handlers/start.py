@@ -1,7 +1,7 @@
-from aiogram.filters.command import Command
 from aiogram import Router, types
-from core.logger import log_dec, logger_factory
+from aiogram.filters.command import Command
 from aiogram.fsm import context
+from core.logger import log_dec, logger_factory
 from dummy_db import USERS
 from states import NewUser, Route
 from utils import send_message_and_sleep
