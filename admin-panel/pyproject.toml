@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "Admin panel for Guide bot"
+description = "Административная панель для бота"
+version = "0.1.0"
+authors = ["dcomrad", "danlaryushin", "GUSICATC", "SergeychUK92", "STI-xa", "94R1K"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "3.2"
+pillow = "9.0.0"
+python-dotenv = "^1.0.0"
+psycopg2-binary = "2.9.5"
+uwsgi = "2.0.21"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
