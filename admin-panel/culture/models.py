@@ -151,12 +151,11 @@ class ObjectStep(models.Model):
     def __str__(self):
         if self.step.content:
             return f'{self.step.content[:50]}...'
-        else:
-            return str(self.step.photo)
+        return str(self.step.photo)
 
 
 class User(models.Model):
-    id = models.IntegerField(
+    id = models.IntegerField(  # noqa: VNE003
         primary_key=True
     )
     name = models.CharField(

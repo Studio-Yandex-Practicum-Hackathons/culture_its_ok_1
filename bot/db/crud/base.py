@@ -93,6 +93,7 @@ class CRUDBase:
             sort: str | None = None
     ):
         query = select(self.model)
+
         if attrs:
             query = query.where(
                 self._make_queries_chain(
@@ -108,7 +109,7 @@ class CRUDBase:
         if self._validate_sort_query(sort):
             query = query.order_by(text(sort))
 
-        return query
+        return query  # noqa: R504
 
     @staticmethod
     def _validate_sort_query(sort: Optional[str] = None) -> bool:

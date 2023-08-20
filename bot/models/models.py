@@ -1,8 +1,8 @@
 from datetime import datetime
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime
-from sqlalchemy.orm import relationship
 
 from db.postgres import Base
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
+                        Text)
 
 
 class Route(Base):
@@ -74,7 +74,6 @@ class Reflection(Base):
     route_id = Column(ForeignKey('route.id'), primary_key=True)
     object_id = Column(ForeignKey('object.id'), primary_key=True)
     question = Column(Text, nullable=False)
-    answer_type = Column(String(10), info={'choices': TYPE_CHOICES},  # noqa: VNE003
-                         nullable=False)
+    answer_type = Column(String(10), info={'choices': TYPE_CHOICES},
+                         nullable=False)  # noqa: VNE003
     answer_content = Column(Text, nullable=False)
-
