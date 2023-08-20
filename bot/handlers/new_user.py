@@ -3,9 +3,10 @@ import re
 from aiogram import F, Router, types
 from aiogram.fsm import context
 from core.logger import log_dec, logger_factory
-from dummy_db import USERS
 from states import NewUser, Route
 from utils import send_message_and_sleep
+from db.crud import user_crud
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = Router()
 logger = logger_factory(__name__)
@@ -33,7 +34,11 @@ async def name_input(message: types.Message, state: context.FSMContext):
 
 @router.message(NewUser.age_input, F.text)
 @log_dec(logger)
-async def age_input(message: types.Message, state: context.FSMContext):
+async def age_input(
+        message: types.Message,
+        state: context.FSMContext,
+        session: AsyncSession
+):
     if (
         not message.text.isdecimal() or
         message.text.isdecimal() and
@@ -43,15 +48,17 @@ async def age_input(message: types.Message, state: context.FSMContext):
         return
 
     # сохраняем пользователя
-    USERS[message.from_user.id] = {
+    user = {
+        'id': message.from_user.id,
         **await state.get_data(),
         'age': int(message.text)
     }
-    await state.clear()
+    await user_crud.create(user, session)
 
     await send_message_and_sleep(
         message,
-        f'{USERS[message.from_user.id]["name"]}, приятно познакомиться.'
+        f'{user["name"]}, приятно познакомиться.'
     )
     await message.answer('Пожалуйста, выберите маршрут')
+    await state.clear()
     await state.set_state(Route.route_selection)
