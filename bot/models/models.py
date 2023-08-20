@@ -10,8 +10,6 @@ class Route(Base):
     photo = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
     address = Column(String(255), nullable=False)
-    welcome_message = Column(Text)
-    goodbye_message = Column(Text)
     is_active = Column(Boolean, default=False)
 
     def __repr__(self):
