@@ -2,26 +2,66 @@ from django.db import models
 
 
 class Route(models.Model):
-    name = models.CharField(max_length=255, verbose_name='Название маршрута')
-    photo = models.ImageField(upload_to='photos', verbose_name='Фото маршрута')
-    description = models.TextField(verbose_name='Описание маршрута')
-    address = models.CharField(max_length=255, verbose_name='Адрес маршрута')
-    welcome_message = models.TextField(
-        verbose_name='Приветственное сообщение',
-        blank=True,
-        null=True
+    name = models.CharField(
+        max_length=255,
+        verbose_name='Название'
     )
-    goodbye_message = models.TextField(
-        verbose_name='Прощальное сообщение',
-        blank=True,
-        null=True
+    photo = models.ImageField(
+        upload_to='photos',
+        verbose_name='Обложка'
     )
-    is_active = models.BooleanField(default=True, verbose_name='Активно')
+    description = models.TextField(
+        verbose_name='Описание'
+    )
+    address = models.CharField(
+        max_length=255,
+        verbose_name='Адрес начала'
+    )
+    is_active = models.BooleanField(
+        default=False,
+        verbose_name='Активен'
+    )
 
     class Meta:
         verbose_name = 'Маршрут'
         verbose_name_plural = 'Маршруты'
-        ordering = ('-pk',)
+        ordering = ('pk',)
+
+    def __str__(self):
+        return self.name
+
+
+class Object(models.Model):
+    name = models.CharField(
+        max_length=255,
+        verbose_name='Название',
+        blank=True,
+        null=True
+    )
+    author = models.CharField(
+        max_length=255,
+        verbose_name='Автор',
+        blank=True,
+        null=True
+    )
+    address = models.CharField(
+        max_length=255,
+        verbose_name='Адрес'
+    )
+    how_to_get = models.TextField(
+        verbose_name='Как добраться',
+        blank=True,
+        null=True
+    )
+    is_active = models.BooleanField(
+        default=False,
+        verbose_name='Активен'
+    )
+
+    class Meta:
+        verbose_name = 'Объект'
+        verbose_name_plural = 'Объекты'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -32,8 +72,10 @@ class Step(models.Model):
         ('text', 'Текст'),
         ('photo', 'Фото'),
         ('reflection', 'Рефлексия'),
-        ('continue_button', 'Кнопка продолжить'),
+        ('continue_button', 'Кнопки'),
     ]
+
+    CHOICE_TO_TEXT = {_type: text for _type, text in TYPE_CHOICES}
 
     type = models.CharField(  # noqa: VNE003
         max_length=20,
@@ -41,9 +83,15 @@ class Step(models.Model):
         verbose_name='Тип шага'
     )
     content = models.TextField(
-        verbose_name='Контент шага',
+        verbose_name='Текстовое содержимое',
         blank=True,
         null=True
+    )
+    photo = models.ImageField(
+        upload_to='photos',
+        blank=True,
+        null=True,
+        verbose_name='Фотография'
     )
     delay_after_display = models.IntegerField(
         verbose_name='Задержка после показа'
@@ -55,32 +103,9 @@ class Step(models.Model):
         ordering = ('-pk',)
 
     def __str__(self):
-        return self.content[:10]
-
-
-class Object(models.Model):
-    name = models.CharField(max_length=255, verbose_name='Название')
-    author = models.CharField(
-        max_length=255,
-        verbose_name='Автор',
-        blank=True,
-        null=True
-    )
-    address = models.CharField(max_length=255, verbose_name='Адрес')
-    how_to_get = models.TextField(
-        verbose_name='Как добраться',
-        blank=True,
-        null=True
-    )
-    is_active = models.BooleanField(default=True, verbose_name='Активно')
-
-    class Meta:
-        verbose_name = 'Объект'
-        verbose_name_plural = 'Объекты'
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
+        to_show = f'{self.CHOICE_TO_TEXT[self.type]}: '
+        to_show += str(self.photo) if self.photo else f'{self.content[:20]}...'
+        return to_show
 
 
 class RouteObject(models.Model):
@@ -94,15 +119,15 @@ class RouteObject(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Объект'
     )
-    object_priority = models.IntegerField(verbose_name='Приоритет')
+    object_priority = models.IntegerField(
+        verbose_name='Приоритет объекта'
+    )
 
     class Meta:
-        verbose_name = 'Путь к объекту'
-        verbose_name_plural = 'Пути к объектам'
         ordering = ('object_priority',)
 
     def __str__(self):
-        return self.route.name
+        return self.object.name
 
 
 class ObjectStep(models.Model):
@@ -116,31 +141,30 @@ class ObjectStep(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Шаг'
     )
-    step_priority = models.IntegerField(verbose_name='Приоритет шага')
+    step_priority = models.IntegerField(
+        verbose_name='Приоритет шага'
+    )
 
     class Meta:
-        verbose_name = 'Шаг к объекту'
-        verbose_name_plural = 'Шаги к объектам'
         ordering = ('step_priority',)
 
     def __str__(self):
-        return self.object.name
+        if self.step.content:
+            return f'{self.step.content[:50]}...'
+        return str(self.step.photo)
 
 
 class User(models.Model):
+    id = models.IntegerField(  # noqa: VNE003
+        primary_key=True
+    )
     name = models.CharField(
         max_length=255,
         verbose_name='Имя'
     )
-    age = models.IntegerField(verbose_name='Возраст')
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name
+    age = models.IntegerField(
+        verbose_name='Возраст'
+    )
 
 
 class Progress(models.Model):
@@ -152,7 +176,7 @@ class Progress(models.Model):
     route = models.ForeignKey(
         Route,
         on_delete=models.CASCADE,
-        verbose_name='Путь'
+        verbose_name='Маршрут'
     )
     object = models.ForeignKey(  # noqa: VNE003
         Object,
@@ -164,18 +188,10 @@ class Progress(models.Model):
         verbose_name='Время начала'
     )
     finished_at = models.DateTimeField(
-        verbose_name='Время конца',
+        verbose_name='Время окончания',
         blank=True,
         null=True
     )
-
-    class Meta:
-        verbose_name = 'Прогресс пользователя'
-        verbose_name_plural = 'Прогресс пользователей'
-        ordering = ('-started_at',)
-
-    def __str__(self):
-        return self.user.name
 
 
 class Reflection(models.Model):
@@ -192,23 +208,21 @@ class Reflection(models.Model):
     route = models.ForeignKey(
         Route,
         on_delete=models.CASCADE,
-        verbose_name='Путь'
+        verbose_name='Маршрут'
     )
     object = models.ForeignKey(  # noqa: VNE003
         Object,
         on_delete=models.CASCADE,
         verbose_name='Объект'
     )
-    type = models.CharField(  # noqa: VNE003
+    question = models.TextField(
+        verbose_name='Вопрос бота'
+    )
+    answer_type = models.CharField(  # noqa: VNE003
         max_length=10,
         choices=TYPE_CHOICES,
-        verbose_name='Тип'
+        verbose_name='Тип ответа'
     )
-    content = models.TextField(verbose_name='Контент')
-
-    class Meta:
-        verbose_name = 'Рефлексия'
-        verbose_name_plural = 'Рефлексия'
-
-    def __str__(self):
-        return self.user.name
+    answer_content = models.TextField(
+        verbose_name='Содержимое ответа'
+    )
