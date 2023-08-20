@@ -2,8 +2,10 @@ from aiogram import Router, types
 from aiogram.filters.command import Command
 from aiogram.fsm import context
 from core.logger import log_dec, logger_factory
-from dummy_db import USERS
-from states import NewUser, Route
+from db.crud import user_crud
+from handlers.new_user import name_input
+from handlers.route import route_selection
+from sqlalchemy.ext.asyncio import AsyncSession
 from utils import send_message_and_sleep
 
 router = Router()
@@ -12,7 +14,11 @@ logger = logger_factory(__name__)
 
 @router.message(Command('start'))
 @log_dec(logger)
-async def cmd_start(message: types.Message, state: context.FSMContext):
+async def cmd_start(
+        message: types.Message,
+        state: context.FSMContext,
+        session: AsyncSession
+):
     await state.clear()
     await send_message_and_sleep(
         message,
@@ -20,15 +26,10 @@ async def cmd_start(message: types.Message, state: context.FSMContext):
         reply_markup=types.ReplyKeyboardRemove()
     )
 
-    if message.from_user.id in USERS:
-        await send_message_and_sleep(
-            message,
-            f'С возвращением, {USERS[message.from_user.id]["name"]}!'
-        )
-        await message.answer('Пожалуйста, выберите маршрут.')
-        await state.set_state(Route.route_selection)
+    user = await user_crud.get(message.from_user.id, session)
+    if user and message.from_user.id == user.id:
+        await send_message_and_sleep(message, f'С возвращением, {user.name}!')
+        await route_selection(message, state, session)
         return
 
-    await send_message_and_sleep(message, 'Давайте познакомимся')
-    await message.answer('Пожалуйста, введите ваше имя')
-    await state.set_state(NewUser.name_input)
+    await name_input(message, state, session)

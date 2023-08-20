@@ -3,7 +3,8 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from core.config import settings
 from core.logger import log_dec, logger_factory
-from handlers import new_user_router, start_router
+from core.middleware import SessionMiddleware
+from handlers import new_user_router, route_router, start_router
 
 
 @log_dec(logger=logger_factory(__name__))
@@ -11,9 +12,11 @@ async def main():
     bot = Bot(token=settings.bot.telegram_token)
 
     dispatcher = Dispatcher()
+    dispatcher.message.middleware(SessionMiddleware())
     dispatcher.include_routers(
         start_router,
-        new_user_router
+        new_user_router,
+        route_router
     )
 
     await bot.delete_webhook(drop_pending_updates=True)
