@@ -13,7 +13,9 @@ def logger_factory(name: str) -> logging.Logger:
     """Генерирует преднастроенный логгер по заданному имени."""
     logger = logging.getLogger(name)
 
-    logger.setLevel(getattr(logging, settings.logging.log_level))
+    logger.setLevel(
+        logging.DEBUG if settings.logging.debug else logging.CRITICAL
+    )
 
     c_handler = logging.StreamHandler(stdout)
     f_handler = RotatingFileHandler(filename=settings.logging.log_file,
