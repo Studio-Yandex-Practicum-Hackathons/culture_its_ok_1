@@ -20,6 +20,7 @@ class EnvBase(BaseSettings):
 
 class BotSettings(EnvBase):
     telegram_token: str
+    debug: bool
 
 
 class PostgresSettings(EnvBase):
@@ -41,10 +42,12 @@ class LoggingSettings(EnvBase):
     log_file: pathlib.Path = BASE_DIR / LOG_DIR / 'bot.log'
     log_format: str = '"%(asctime)s - [%(levelname)s] - %(message)s"'
     dt_format: str = '%d.%m.%Y %H:%M:%S'
-    log_level: str
+    debug: bool
 
     def init_global_logging_level(self):
-        logging.basicConfig(level=getattr(logging, self.log_level))
+        logging.basicConfig(
+            level=logging.DEBUG if self.debug else logging.CRITICAL
+        )
 
 
 class Settings(BaseSettings):

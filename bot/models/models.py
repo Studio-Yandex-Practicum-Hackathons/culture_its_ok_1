@@ -1,94 +1,69 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
+from datetime import datetime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime
 from sqlalchemy.orm import relationship
 
-from .db_base_settings import Base
+from db.postgres import Base
 
 
 class Route(Base):
     name = Column(String(255), nullable=False)
-    photo = Column(String, nullable=False)
+    photo = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
     address = Column(String(255), nullable=False)
     welcome_message = Column(Text)
     goodbye_message = Column(Text)
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=False)
 
-    steps = relationship('Step', backref='route')
+    def __repr__(self):
+        return f'Маршрут ({self.name})'
 
-    def __str__(self):
-        return self.name
+
+class Object(Base):
+    name = Column(String(255))
+    author = Column(String(255))
+    address = Column(String(255), nullable=False)
+    how_to_get = Column(Text)
+    is_active = Column(Boolean, default=False)
+
+    def __repr__(self):
+        return f'Объект ({self.name})'
 
 
 class Step(Base):
-    TYPE_CHOICES = [
+    _TYPE_CHOICES = [
         ('text', 'Текст'),
         ('photo', 'Фото'),
         ('reflection', 'Рефлексия'),
         ('continue_button', 'Кнопка продолжить'),
     ]
+    _CHOICE_TO_TEXT = {_type: text for _type, text in _TYPE_CHOICES}
 
-    type = Column(String(20), info={'choices': TYPE_CHOICES}, nullable=False)
+    type = Column(String(20), info={'choices': _TYPE_CHOICES},  # noqa: VNE003
+                  nullable=False)
     content = Column(Text)
+    photo = Column(String(255))
     delay_after_display = Column(Integer, nullable=False)
 
-    route_id = Column(Integer, ForeignKey('route.id'))
-
-    def __str__(self):
-        return self.type
-
-
-class Object(Base):
-    name = Column(String(255), nullable=False)
-    author = Column(String(255), nullable=False)
-    address = Column(String(255), nullable=False)
-    how_to_get = Column(Text, nullable=False)
-
-    route_objects = relationship('RouteObject', backref='object')
-    object_steps = relationship('ObjectStep', backref='object')
-
-    def __str__(self):
-        return self.name
-
-
-class RouteObject(Base):
-    object_priority = Column(Integer, nullable=False)
-    is_active = Column(Boolean, default=True)
-
-    route_id = Column(Integer, ForeignKey('route.id'))
-    object_id = Column(Integer, ForeignKey('object.id'))
-
-    def __str__(self):
-        return self.route_id.name
-
-
-class ObjectStep(Base):
-    step_priority = Column(Integer, nullable=False)
-
-    object_id = Column(Integer, ForeignKey('object.id'))
-    step_id = Column(Integer, ForeignKey('step.id'))
-
-    def __str__(self):
-        return self.object_id.name
+    def __repr__(self):
+        to_show = f'{self._CHOICE_TO_TEXT[self.type]}: '
+        to_show += str(self.photo) if self.photo else f'{self.content[:20]}...'
+        return f'Шаг ({to_show})'
 
 
 class User(Base):
     name = Column(String(255), nullable=False)
     age = Column(Integer, nullable=False)
 
-    progresses = relationship('Progress', backref='user')
-    reflections = relationship('Reflection', backref='user')
-
-    def __str__(self):
-        return self.name
+    def __repr__(self):
+        return f'Пользователь ({self.name}:{self.age})'
 
 
 class Progress(Base):
-    user_id = Column(Integer, ForeignKey('user.id'))
-    route_id = Column(Integer, ForeignKey('route.id'))
-    object_id = Column(Integer, ForeignKey('object.id'))
-
-    def __str__(self):
-        return self.user_id.name
+    user_id = Column(ForeignKey('user.id'), primary_key=True)
+    route_id = Column(ForeignKey('route.id'), primary_key=True)
+    object_id = Column(ForeignKey('object.id'), primary_key=True)
+    started_at = Column(DateTime, nullable=False, default=datetime.now)
+    finished_at = Column(DateTime)
 
 
 class Reflection(Base):
@@ -97,12 +72,11 @@ class Reflection(Base):
         ('voice', 'Голос'),
     ]
 
-    type = Column(String(10), info={'choices': TYPE_CHOICES}, nullable=False)
-    content = Column(Text, nullable=False)
+    user_id = Column(ForeignKey('user.id'), primary_key=True)
+    route_id = Column(ForeignKey('route.id'), primary_key=True)
+    object_id = Column(ForeignKey('object.id'), primary_key=True)
+    question = Column(Text, nullable=False)
+    answer_type = Column(String(10), info={'choices': TYPE_CHOICES},  # noqa: VNE003
+                         nullable=False)
+    answer_content = Column(Text, nullable=False)
 
-    user_id = Column(Integer, ForeignKey('user.id'))
-    route_id = Column(Integer, ForeignKey('route.id'))
-    object_id = Column(Integer, ForeignKey('object.id'))
-
-    def __str__(self):
-        return self.user_id.name

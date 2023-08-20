@@ -1,2 +1,1 @@
-from .models import (Object, ObjectStep, Progress, Reflection, Route,  # noqa
-                     RouteObject, Step, User)
+from .models import (Object, Progress, Reflection, Route, Step, User)  # noqa: F401
