@@ -35,7 +35,7 @@ class ObjectAdmin(admin.ModelAdmin):
 
 @admin.register(Step)
 class StepAdmin(admin.ModelAdmin):
-    list_display = ('id', 'type', 'content', 'delay_after_display')
+    list_display = ('type', 'content', 'photo', 'delay_after_display')
     list_filter = ('type',)
     search_fields = ('content',)
 
