@@ -5,7 +5,7 @@ from core.logger import log_dec, logger_factory
 from db.crud import route_crud
 from sqlalchemy.ext.asyncio import AsyncSession
 from states import Route
-from utils import send_message_and_sleep, send_photo_and_sleep
+from utils import send_message_and_sleep, send_photo_and_sleep, delete_keyboard
 from aiogram.utils.markdown import hide_link
 from db.dummy import get_next_step
 
@@ -82,6 +82,8 @@ async def route_start(
         callback: types.CallbackQuery,
         state: context.FSMContext
 ):
+    await delete_keyboard(callback.message)
+
     current_route = callback.data.split("$")[1]
     await state.set_data({
         'current_route': current_route,

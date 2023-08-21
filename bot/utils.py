@@ -7,7 +7,7 @@ from core.config import MEDIA_DIR
 async def send_message_and_sleep(
     message: types.Message,
     text: str,
-    delay: int = 1,
+    delay: int = 0,
     **kwargs
 ):
     await message.answer(text, **kwargs)
@@ -17,7 +17,7 @@ async def send_message_and_sleep(
 async def send_photo_and_sleep(
     message: types.Message,
     photo_path: str,
-    delay: int = 5,
+    delay: int = 0,
     **kwargs
 ):
     await message.answer_photo(
@@ -25,3 +25,10 @@ async def send_photo_and_sleep(
         **kwargs
     )
     await sleep(delay)
+
+
+async def delete_keyboard(
+        message: types.Message,
+):
+    msg = await message.answer('...', reply_markup=types.ReplyKeyboardRemove())
+    await msg.delete()
