@@ -9,10 +9,11 @@ from handlers import new_user_router, route_router, start_router
 
 @log_dec(logger=logger_factory(__name__))
 async def main():
-    bot = Bot(token=settings.bot.telegram_token)
+    bot = Bot(token=settings.bot.telegram_token, parse_mode='html')
 
     dispatcher = Dispatcher()
     dispatcher.message.middleware(SessionMiddleware())
+    dispatcher.callback_query.middleware(SessionMiddleware())
     dispatcher.include_routers(
         start_router,
         new_user_router,
