@@ -43,3 +43,11 @@ async def delete_inline_keyboard(
         message: types.Message,
 ):
     await message.edit_reply_markup(reply_markup=None)
+
+
+async def text_time_delay(
+        text: str
+):
+    words=len(text.split())
+#Средняя скорость чтения 200 слов в минуту т.е. 1 слово 0,3 сек
+    return words*0.3 
