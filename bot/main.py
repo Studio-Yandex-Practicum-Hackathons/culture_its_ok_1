@@ -13,6 +13,7 @@ async def main():
 
     dispatcher = Dispatcher()
     dispatcher.message.middleware(SessionMiddleware())
+    dispatcher.callback_query.middleware(SessionMiddleware())
     dispatcher.include_routers(
         start_router,
         new_user_router,

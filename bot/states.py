@@ -7,10 +7,10 @@ class NewUser(state.StatesGroup):
 
 
 class Route(state.StatesGroup):
-    route_selection = state.State()
-    route_passing = state.State()
+    selection = state.State()
+    following = state.State()
     reflection = state.State()
-    point_search = state.State()
+    search = state.State()
 
 
 class Admin(state.StatesGroup):
