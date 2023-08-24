@@ -59,7 +59,6 @@ async def route_selection(
             ROUTE_START_POINT.format(address=current_route.address),
             reply_markup=keyboard
         )
-        state.update_data()
 
 
 @router.callback_query(Route.selection, F.data.startswith('route$'))
