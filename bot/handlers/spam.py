@@ -24,11 +24,7 @@ async def route_selection(
     message: types.Message,
     state: context.FSMContext,
 ):
-    if (
-        await state.get_state() == Route.selection
-        or await state.get_state() == Route.search
-        or await state.get_state() == Route.following
-    ):
+    if await state.get_state() != Route.reflection:
         try:
             counter.spam_count += 1
         except AttributeError:
