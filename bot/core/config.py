@@ -55,7 +55,7 @@ class LoggingSettings(EnvBase):
 
 
 class GoogleInfo(EnvBase):
-    type: str = ''
+    type: str = ''  # noqa: VNE003
     project_id: str = ''
     private_key_id: str = ''
     private_key: str = ''
