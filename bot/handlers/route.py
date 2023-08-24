@@ -1,8 +1,9 @@
+from datetime import datetime
 from aiogram import F, Router, types
 from aiogram.fsm import context
 from core.exceptions import LogicalError
 from core.logger import log_dec, logger_factory
-from db.crud import route_crud
+from db.crud import route_crud, reflection_crud, progress_crud
 from keyboards.keyboards import (CALLBACK_NO, CALLBACK_YES, get_keyboard,
                                  get_one_button_inline_keyboard,
                                  get_yes_no_inline_keyboard)
@@ -38,6 +39,7 @@ async def route_selection(
             session,
             sort='id asc'
         )
+        if route.objects
     }
 
     if await state.get_state() != Route.selection:
@@ -80,12 +82,22 @@ async def route_start(
 
     steps = []
     for _object in route.objects:
-        steps.extend(_object.steps)
+        for step in _object.steps:
+            step.object_id = _object.id
+            steps.append(step)
+
+    progress = dict(
+        user_id=callback.from_user.id,
+        route_id=route_id,
+        object_id=steps[0].object_id,
+    )
+    progress_db = await progress_crud.create(progress, session)
 
     await state.set_data({
-        'current_route_id': route_id,
+        'route_id': route_id,
         'current_step': 0,
-        'steps': steps
+        'steps': steps,
+        'progress_id': progress_db.id
     })
 
     await route_follow(callback.message, state, session)
@@ -100,13 +112,22 @@ async def route_follow(
     """Функция проходит по цепочке шагов и отправляет пользователю сообщения"""
     await state.set_state(Route.following)
 
-    data = await state.get_data()
+    state_data = await state.get_data()
 
+    # нужно хранить последнее отправленное сообщение, чтобы редактировать у
+    # него inline-кнопки
     last_message = None
 
-    while data['current_step'] < len(data['steps']):
-        step = data['steps'][data['current_step']]
-        data['current_step'] += 1
+    while state_data['current_step'] < len(state_data['steps']):
+        step = state_data['steps'][state_data['current_step']]
+        state_data['current_step'] += 1
+
+        # записали в БД текущий прогресс
+        await progress_crud.update_by_attribute(
+            {'id': state_data['progress_id']},
+            {'object_id': step.object_id},
+            session
+        )
 
         if step.type == 'text':
             last_message = await send_message_and_sleep(
@@ -128,17 +149,23 @@ async def route_follow(
 
             await last_message.edit_reply_markup(reply_markup=keyboard)
             await state.set_state(Route.search)
-            await state.set_data(data)
+            await state.set_data(state_data)
             return
 
         if step.type == 'reflection':
             await message.answer(step.content)
             await state.set_state(Route.reflection)
-            await state.set_data(data)
+            await state.set_data(state_data)
             return
 
-    # TODO: сохраняем базу информацию о прохождении пользователем маршрута
+    # маршрут окончен, сохраняем прогресс и очищаем состояние
+    await progress_crud.update_by_attribute(
+        {'id': state_data['progress_id']},
+        {'finished_at': datetime.now()},
+        session
+    )
     await state.clear()
+
     await route_selection(message, state, session)
 
 

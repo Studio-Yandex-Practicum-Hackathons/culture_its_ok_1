@@ -70,6 +70,26 @@ class CRUDBase:
         await session.refresh(db_obj)
         return db_obj
 
+    async def update_by_attribute(
+            self,
+            attrs: dict[str, Any],
+            update_data: dict[Any],
+            session: AsyncSession,
+    ):
+        db_obj = await self.get_by_attribute(attrs, session)
+
+        if db_obj is None:
+            raise ValueError(f'Объект отсутствует в БД ({attrs})')
+
+        for field in update_data:
+            if hasattr(db_obj, field):
+                setattr(db_obj, field, update_data[field])
+
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
     def _make_queries_chain(
             self,
             names: list[Any],
