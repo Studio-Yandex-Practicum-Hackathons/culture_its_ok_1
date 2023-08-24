@@ -17,7 +17,7 @@ MEDIA_DIR: pathlib.Path = BASE_DIR / 'media'
 class EnvBase(BaseSettings):
     class Config:
         env_file = None if IN_DOCKER else '.env'
-        extra = Extra.allow
+        extra = Extra.ignore
 
 
 class BotSettings(EnvBase):
@@ -52,11 +52,34 @@ class LoggingSettings(EnvBase):
         )
 
 
+class GoogleInfo(EnvBase):
+    type: str = ''
+    project_id: str = ''
+    private_key_id: str = ''
+    private_key: str = ''
+    client_email: str = ''
+    client_id: str = ''
+    auth_uri: str = ''
+    token_uri: str = ''
+    auth_provider_x509_cert_url: str = ''
+    client_x509_cert_url: str = ''
+
+
+class GoogleSettings(EnvBase):
+    info: GoogleInfo = GoogleInfo()
+    spreadsheet_url: str
+    scopes: list[str] = [
+        'https://www.googleapis.com/auth/spreadsheets',
+        'https://www.googleapis.com/auth/drive'
+    ]
+
+
 class Settings(BaseSettings):
     bot: BotSettings = BotSettings()
+    logging: LoggingSettings = LoggingSettings()
     postgres: PostgresSettings = PostgresSettings()
     sentry: SentrySettings = SentrySettings()
-    logging: LoggingSettings = LoggingSettings()
+    google: GoogleSettings = GoogleSettings()
 
 
 settings = Settings()
