@@ -5,8 +5,8 @@ from .models import Object, ObjectStep, Route, RouteObject, Step
 
 
 class RouteObjectInline(admin.TabularInline):
-    verbose_name = 'Этап'
-    verbose_name_plural = 'Этапы'
+    verbose_name = 'Объект'
+    verbose_name_plural = 'Объекты'
     model = RouteObject
     extra = 3
 

@@ -1,7 +1,6 @@
-from aiogoogle.resource import GoogleAPI
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
-
+from aiogoogle.resource import GoogleAPI
 from core.config import settings
 from pydantic import EmailStr
 
