@@ -34,24 +34,24 @@ class Route(models.Model):
 class Object(models.Model):
     name = models.CharField(
         max_length=255,
-        verbose_name='Название',
-        blank=True,
-        null=True
+        verbose_name='Название'
     )
     author = models.CharField(
         max_length=255,
-        verbose_name='Автор',
         blank=True,
-        null=True
+        null=True,
+        verbose_name='Автор',
     )
     address = models.CharField(
         max_length=255,
-        verbose_name='Адрес'
+        blank=True,
+        null=True,
+        verbose_name='Адрес',
     )
     how_to_get = models.TextField(
-        verbose_name='Как добраться',
         blank=True,
-        null=True
+        null=True,
+        verbose_name='Как добраться',
     )
     is_active = models.BooleanField(
         default=False,
@@ -83,9 +83,9 @@ class Step(models.Model):
         verbose_name='Тип шага'
     )
     content = models.TextField(
-        verbose_name='Текстовое содержимое',
         blank=True,
-        null=True
+        null=True,
+        verbose_name='Текстовое содержимое',
     )
     photo = models.ImageField(
         upload_to='photos',
@@ -94,7 +94,9 @@ class Step(models.Model):
         verbose_name='Фотография'
     )
     delay_after_display = models.IntegerField(
-        verbose_name='Задержка после показа'
+        blank=True,
+        null=True,
+        verbose_name='Задержка после показа',
     )
 
     class Meta:
@@ -188,9 +190,9 @@ class Progress(models.Model):
         verbose_name='Время начала'
     )
     finished_at = models.DateTimeField(
-        verbose_name='Время окончания',
         blank=True,
-        null=True
+        null=True,
+        verbose_name='Время окончания',
     )
 
 

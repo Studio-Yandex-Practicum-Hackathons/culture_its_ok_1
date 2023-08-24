@@ -23,6 +23,8 @@ class EnvBase(BaseSettings):
 class BotSettings(EnvBase):
     telegram_token: str
     debug: bool
+    words_per_minute: int = 250  # скорость чтения текста, слов в минуту
+    photo_showing_delay: int = 5  # задержка в секундах при показе фотографий
 
 
 class PostgresSettings(EnvBase):
