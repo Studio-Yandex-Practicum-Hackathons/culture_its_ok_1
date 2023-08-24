@@ -30,9 +30,9 @@ class Route(Base):
 
 
 class Object(Base):
-    name = Column(String(255))
+    name = Column(String(255), nullable=False)
     author = Column(String(255))
-    address = Column(String(255), nullable=False)
+    address = Column(String(255))
     how_to_get = Column(Text)
     is_active = Column(Boolean, default=False)
 
@@ -62,7 +62,7 @@ class Step(Base):
                   nullable=False)
     content = Column(Text)
     photo = Column(String(255))
-    delay_after_display = Column(Integer, nullable=False)
+    delay_after_display = Column(Integer)
 
     def __repr__(self):
         to_show = f'{self._CHOICE_TO_TEXT[self.type]}: '
