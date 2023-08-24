@@ -6,8 +6,8 @@ from core.logger import log_dec, logger_factory
 from db.crud import user_crud
 from handlers.route import route_selection
 from sqlalchemy.ext.asyncio import AsyncSession
-from states import NewUser
-from utils import send_message_and_sleep
+from core.states import NewUser
+from core.utils import send_message_and_sleep
 
 router = Router()
 logger = logger_factory(__name__)

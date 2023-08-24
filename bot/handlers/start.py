@@ -6,7 +6,7 @@ from db.crud import user_crud
 from handlers.new_user import name_input
 from handlers.route import route_selection
 from sqlalchemy.ext.asyncio import AsyncSession
-from utils import send_message_and_sleep
+from core.utils import send_message_and_sleep
 
 router = Router()
 logger = logger_factory(__name__)

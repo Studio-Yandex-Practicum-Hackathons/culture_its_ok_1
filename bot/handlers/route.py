@@ -9,9 +9,9 @@ from keyboards.keyboards import (CALLBACK_NO, CALLBACK_YES, get_keyboard,
                                  get_one_button_inline_keyboard,
                                  get_yes_no_inline_keyboard)
 from sqlalchemy.ext.asyncio import AsyncSession
-from states import Route
-from utils import (delete_inline_keyboard, delete_keyboard,
-                   send_message_and_sleep, send_photo_and_sleep)
+from core.states import Route
+from core.utils import (delete_inline_keyboard, delete_keyboard,
+                        send_message_and_sleep, send_photo_and_sleep)
 
 router = Router()
 logger = logger_factory(__name__)
