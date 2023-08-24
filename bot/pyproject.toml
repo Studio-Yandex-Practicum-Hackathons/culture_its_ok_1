@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "Guide bot"
+description = "Бот для арт-медитации по объектам уличного искусства в Ростове-на-Дону"
+version = "0.1.0"
+authors = ["dcomrad", "danlaryushin", "GUSICATC", "SergeychUK92", "STI-xa", "94R1K"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "2.1.1"
+pydantic-settings = "^2.0.3"
+aiogram = "3.0.0rc1"
+sentry-sdk = "^1.29.2"
+asyncpg = "^0.28.0"
+aiosqlite = "^0.19.0"
+sqlalchemy = "1.4.29"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

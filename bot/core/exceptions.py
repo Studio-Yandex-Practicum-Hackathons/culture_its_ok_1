@@ -1,0 +1,2 @@
+class LogicalError(Exception):
+    pass
