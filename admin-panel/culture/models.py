@@ -1,5 +1,5 @@
 from django.db import models
-
+from PIL import Image
 
 class Route(models.Model):
     name = models.CharField(
@@ -108,7 +108,14 @@ class Step(models.Model):
         to_show = f'{self.CHOICE_TO_TEXT[self.type]}: '
         to_show += str(self.photo) if self.photo else f'{self.content[:20]}...'
         return to_show
-
+    
+    def save(self,*args,**kwargs):
+        super().save(*args,**kwargs)
+        SIZE= 300,300
+        if self.photo:
+            image=Image.open(self.photo.path)
+            image.thumbnail(SIZE,Image.LANCZOS)
+            image.save(self.photo.path)   
 
 class RouteObject(models.Model):
     route = models.ForeignKey(
