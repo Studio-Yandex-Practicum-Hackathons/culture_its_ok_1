@@ -6,8 +6,6 @@ services:
     container_name: culture-postgres
     hostname: ${POSTGRES_HOST}
     restart: on-failure
-    ports:
-      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     expose:
       - ${POSTGRES_PORT}
     volumes:
@@ -41,8 +39,6 @@ services:
     depends_on:
       - postgres
     entrypoint: /app/docker-entrypoint.sh
-    ports:
-      - ${DJANGO_PORT}:${DJANGO_PORT}
     expose:
       - ${DJANGO_PORT}
     volumes:
