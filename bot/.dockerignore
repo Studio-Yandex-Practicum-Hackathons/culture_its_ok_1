@@ -1,3 +1,7 @@
 Dockerfile
+env
+venv
+.venv
 media
+static
 .env

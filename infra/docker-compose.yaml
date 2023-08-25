@@ -34,7 +34,7 @@ services:
       - ./env/.general
 
   django:
-    image: dcomraad/culture-django
+    image: dcomrad/culture-django
     container_name: culture-admin
     restart: on-failure
     hostname: ${DJANGO_HOST}
@@ -54,7 +54,7 @@ services:
       - ./env/.postgres
 
   bot:
-    image: dcomraad/culture-bot
+    image: dcomrad/culture-bot
     container_name: culture-bot
     restart: on-failure
     depends_on:
