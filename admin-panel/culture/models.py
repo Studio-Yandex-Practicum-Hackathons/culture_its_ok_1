@@ -167,6 +167,12 @@ class User(models.Model):
     age = models.IntegerField(
         verbose_name='Возраст'
     )
+    interests = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Интересы'
+    )
 
 
 class Progress(models.Model):
@@ -194,6 +200,11 @@ class Progress(models.Model):
         null=True,
         verbose_name='Время окончания',
     )
+    rating = models.IntegerField(
+        verbose_name='Оценка маршрута пользователем',
+        blank=True,
+        null=True,
+    )
 
 
 class Reflection(models.Model):
@@ -207,18 +218,17 @@ class Reflection(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
     )
-    route = models.ForeignKey(
-        Route,
-        on_delete=models.CASCADE,
-        verbose_name='Маршрут'
+    route = models.CharField(
+        max_length=255,
+        verbose_name='Название маршрута'
     )
-    object = models.ForeignKey(  # noqa: VNE003
-        Object,
-        on_delete=models.CASCADE,
-        verbose_name='Объект'
+    object = models.CharField(  # noqa: VNE003
+        max_length=255,
+        verbose_name='Название объекта'
     )
-    question = models.TextField(
-        verbose_name='Вопрос бота'
+    question = models.CharField(
+        max_length=255,
+        verbose_name='Вопрос для рефлексии'
     )
     answer_type = models.CharField(  # noqa: VNE003
         max_length=10,
