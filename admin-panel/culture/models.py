@@ -111,7 +111,7 @@ class Step(models.Model):
     
     def save(self,*args,**kwargs):
         super().save(*args,**kwargs)
-        SIZE= 300,300
+        SIZE= 300, 300
         if self.photo:
             image=Image.open(self.photo.path)
             image.thumbnail(SIZE,Image.LANCZOS)
