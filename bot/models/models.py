@@ -89,6 +89,7 @@ class ObjectStep(Base):
 class User(Base):
     name = Column(String(255), nullable=False)
     age = Column(Integer, nullable=False)
+    interests = Column(String(255))
 
     def __repr__(self):
         return f'Пользователь ({self.name}:{self.age})'
@@ -100,6 +101,7 @@ class Progress(Base):
     object_id = Column(ForeignKey('culture_object.id'), primary_key=True)
     started_at = Column(DateTime, nullable=False, default=datetime.now)
     finished_at = Column(DateTime)
+    rating = Column(Integer)
 
 
 class Reflection(Base):
@@ -108,10 +110,10 @@ class Reflection(Base):
         ('voice', 'Голос'),
     ]
 
-    user_id = Column(ForeignKey('culture_user.id'), primary_key=True)
-    route_id = Column(ForeignKey('culture_route.id'), primary_key=True)
-    object_id = Column(ForeignKey('culture_object.id'), primary_key=True)
-    question = Column(Text, nullable=False)
+    user_id = Column(ForeignKey('culture_user.id'))
+    route_name = Column(String(255), nullable=False)
+    object_name = Column(String(255), nullable=False)
+    question = Column(String(255), nullable=False)
     answer_type = Column(String(10), info={'choices': TYPE_CHOICES},
                          nullable=False)  # noqa: VNE003
     answer_content = Column(Text, nullable=False)
