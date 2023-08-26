@@ -1,7 +1,10 @@
+import re
 from asyncio import sleep
 
 from aiogram import types
 from core.config import MEDIA_DIR, settings
+
+EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 
 
 async def send_message_and_sleep(
@@ -69,3 +72,7 @@ def text_reading_time(
     :return: Время чтения в секундах
     """
     return max(1, int(len(text.split()) / words_per_minute * 60))
+
+
+def check_is_email(email: str) -> bool:
+    return bool(re.fullmatch(EMAIL_REGEX, email))
