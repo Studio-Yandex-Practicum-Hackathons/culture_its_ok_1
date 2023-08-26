@@ -1,20 +1,18 @@
-from aiogram.utils.keyboard import (InlineKeyboardBuilder,
-                                    InlineKeyboardButton, KeyboardButton,
-                                    ReplyKeyboardBuilder)
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
 CALLBACK_YES = 'ROUTE_YES'
 CALLBACK_NO = 'ROUTE_NO'
 
 
-def get_keyboard(
-        *args,
+def get_inline_keyboard(
+        buttons: dict[str, str],
         adjust: int
 ):
-    builder = ReplyKeyboardBuilder()
-    for button_text in args:
-        builder.add(KeyboardButton(text=button_text))
+    builder = InlineKeyboardBuilder()
+    for text, callback in buttons.items():
+        builder.add(InlineKeyboardButton(text=text, callback_data=callback))
     builder.adjust(adjust)
-    return builder.as_markup(resize_keyboard=True)
+    return builder.as_markup()
 
 
 def get_one_button_inline_keyboard(

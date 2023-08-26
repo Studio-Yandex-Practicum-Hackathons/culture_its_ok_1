@@ -1,29 +1,33 @@
+import re
 from datetime import datetime
 
 from aiogram import F, Router, types
+from aiogram.filters.command import Command
 from aiogram.fsm import context
 from core.exceptions import LogicalError
 from core.logger import log_dec, logger_factory
-from db.crud import progress_crud, route_crud
-from keyboards.keyboards import (CALLBACK_NO, CALLBACK_YES, get_keyboard,
-                                 get_one_button_inline_keyboard,
-                                 get_yes_no_inline_keyboard)
-from sqlalchemy.ext.asyncio import AsyncSession
 from core.states import Route
 from core.utils import (delete_inline_keyboard, delete_keyboard,
                         send_message_and_sleep, send_photo_and_sleep)
+from db.crud import progress_crud, route_crud
+from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
+                              get_one_button_inline_keyboard,
+                              get_yes_no_inline_keyboard)
+from keyboards.reply import get_reply_keyboard
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = Router()
 logger = logger_factory(__name__)
 
+NO_ROUTES = 'К сожалению, на данный момент нет ни одного активного маршрута'
 ROUTE_SELECTION = (
-    'На выбор представлено три маршрута. Выберите любой, нажав '
-    'кнопку ниже, чтобы посмотреть его подробное описание.'
+    'Выберите маршрут из списка ниже, чтобы посмотреть его подробное описание'
 )
+START_MEDITATION = 'Начать медитацию'
 ROUTE_START_POINT = 'Медитация начинается по адресу:\n{address}'
 
 
-@router.message(Route.selection, F.text)
+@router.message(Route.selection, F.text, ~Command(re.compile(r'^.+$')))
 @log_dec(logger)
 async def route_selection(
         message: types.Message,
@@ -33,19 +37,18 @@ async def route_selection(
     """Обработчик выбора маршрута пользователем. Формирует клавиатуру с
     маршрутами. Выводит информацию о маршруте при нажатии на соответствующую
     кнопку."""
-    routes = {
-        route.name: route for route in
-        await route_crud.get_all_by_attribute(
-            {'is_active': True},
-            session,
-            sort='id asc'
-        )
-        if route.objects
-    }
+    db_routes = await route_crud.get_all_by_attribute(
+        {'is_active': True}, session, sort='id asc'
+    )
+    if not db_routes:
+        await message.answer(NO_ROUTES)
+        return
+
+    routes = {route.name: route for route in db_routes[:3] if route.objects}
 
     if await state.get_state() != Route.selection:
         await state.set_state(Route.selection)
-        keyboard = get_keyboard(*routes.keys(), adjust=1)
+        keyboard = get_reply_keyboard(*routes.keys(), adjust=1)
         await message.answer(ROUTE_SELECTION, reply_markup=keyboard)
         return
 
@@ -53,7 +56,7 @@ async def route_selection(
         current_route = routes[message.text]
 
         keyboard = get_one_button_inline_keyboard(
-            text='Начать медитацию', callback_data=f'route${current_route.id}'
+            text=START_MEDITATION, callback_data=f'route${current_route.id}'
         )
 
         await send_photo_and_sleep(message, current_route.photo)

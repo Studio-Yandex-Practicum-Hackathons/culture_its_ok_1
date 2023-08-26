@@ -1,18 +1,18 @@
 from aiogram import Router, types
-from aiogram.filters.command import Command
+from aiogram.filters.command import CommandStart
 from aiogram.fsm import context
 from core.logger import log_dec, logger_factory
+from core.utils import send_message_and_sleep
 from db.crud import user_crud
 from handlers.new_user import name_input
 from handlers.route import route_selection
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.utils import send_message_and_sleep
 
 router = Router()
 logger = logger_factory(__name__)
 
 
-@router.message(Command('start'))
+@router.message(CommandStart())
 @log_dec(logger)
 async def cmd_start(
         message: types.Message,

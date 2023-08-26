@@ -23,15 +23,14 @@ class GoogleReport:
     def set_title(self, title: str) -> None:
         self.title = title
 
-    def set_header(self, *args) -> None:
-        self.header.clear()
-        self.header.extend(*args)
+    def set_header(self, header: list[list[str]]) -> None:
+        self.header = header
 
     def set_email(self, email: EmailStr) -> None:
         self.email = email
 
-    def add_rows(self, *args) -> None:
-        self.rows.extend(*args)
+    def add_rows(self, rows: list[list[str]]) -> None:
+        self.rows.extend(rows)
 
     async def create(self):
         self._validate_fields()
