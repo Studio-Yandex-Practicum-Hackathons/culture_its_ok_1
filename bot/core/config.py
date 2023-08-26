@@ -4,7 +4,7 @@ import pathlib
 from pathlib import Path
 
 import sentry_sdk
-from pydantic import Extra, Field
+from pydantic import Extra, Field, SecretStr
 from pydantic_settings import BaseSettings
 
 IN_DOCKER: bool = os.getenv('AM_I_IN_A_DOCKER_CONTAINER', False) == 'YES'
@@ -23,6 +23,7 @@ class EnvBase(BaseSettings):
 class BotSettings(EnvBase):
     telegram_token: str
     debug: bool
+    admin_password: SecretStr
     words_per_minute: int
     photo_showing_delay: int
 
