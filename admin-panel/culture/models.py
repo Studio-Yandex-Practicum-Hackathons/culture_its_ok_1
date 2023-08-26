@@ -1,5 +1,6 @@
 from django.db import models
-from PIL import Image
+from culture.utils import resize_photo
+
 
 class Route(models.Model):
     name = models.CharField(
@@ -29,6 +30,11 @@ class Route(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.photo:
+            resize_photo(self.photo.path)
 
 
 class Object(models.Model):
@@ -111,11 +117,9 @@ class Step(models.Model):
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        SIZE = 300, 300
         if self.photo:
-            image = Image.open(self.photo.path)
-            image.thumbnail(SIZE, Image.LANCZOS)
-            image.save(self.photo.path)
+            resize_photo(self.photo.path)
+
 
 class RouteObject(models.Model):
     route = models.ForeignKey(
