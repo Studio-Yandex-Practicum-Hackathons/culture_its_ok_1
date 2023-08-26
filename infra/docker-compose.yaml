@@ -32,7 +32,7 @@ services:
       - ./env/.general
 
   django:
-    image: dcomrad/culture-django
+    image: dcomrad/culture-admin
     container_name: culture-admin
     restart: on-failure
     hostname: ${DJANGO_HOST}
