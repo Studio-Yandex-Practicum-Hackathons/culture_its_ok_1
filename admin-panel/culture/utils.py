@@ -1,6 +1,7 @@
 import os
-from PIL import Image
+
 from dotenv import load_dotenv
+from PIL import Image
 
 load_dotenv()
 
