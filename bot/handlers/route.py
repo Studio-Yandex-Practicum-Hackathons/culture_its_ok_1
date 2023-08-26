@@ -173,7 +173,7 @@ async def route_follow(
         {'finished_at': datetime.now()},
         session
     )
-    await reset_state(state, next_delay=1)
+    await reset_state(state, next_delay=3)
 
     await route_selection(message, state, session)
 

@@ -88,11 +88,8 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             sudo docker pull dcomrad/culture-admin
-            sudo docker container stop culture-admin
-            sudo docker container rm culture-admin
             sudo docker pull dcomrad/culture-bot
-            sudo docker container stop culture-bot
-            sudo docker container rm culture-bot
             cd ~/infra
+            sudo docker compose --env-file=env/.general down
             sudo docker compose --env-file=env/.general up -d
             sudo docker image prune -f
