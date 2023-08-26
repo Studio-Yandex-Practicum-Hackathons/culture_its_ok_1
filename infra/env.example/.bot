@@ -2,3 +2,4 @@ TELEGRAM_TOKEN=<telegram token>
 DEBUG=FALSE
 WORDS_PER_MINUTE=250  # скорость чтения текста, слов в минуту
 PHOTO_SHOWING_DELAY=5  # задержка в секундах при показе фотографий
+ADMIN_PASSWORD=flvbybcnhfnjh
