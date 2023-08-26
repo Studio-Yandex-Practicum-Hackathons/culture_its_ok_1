@@ -1,5 +1,5 @@
-from django.db import models
 from culture.utils import resize_photo
+from django.db import models
 
 
 class Route(models.Model):
@@ -114,7 +114,7 @@ class Step(models.Model):
         to_show = f'{self.CHOICE_TO_TEXT[self.type]}: '
         to_show += str(self.photo) if self.photo else f'{self.content[:20]}...'
         return to_show
-    
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.photo:
