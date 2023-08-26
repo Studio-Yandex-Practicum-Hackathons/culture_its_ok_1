@@ -4,7 +4,7 @@ from aiogram import F, Router, types
 from aiogram.fsm import context
 from core.logger import log_dec, logger_factory
 from core.states import NewUser
-from core.utils import send_message_and_sleep
+from core.utils import answer_with_delay, reset_state
 from db.crud import user_crud
 from handlers.route import route_selection
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +18,13 @@ MAX_NAME_LENGTH = 30
 MIN_AGE = 2
 MAX_AGE = 125
 
+ACQUAINTANCE = 'Давайте познакомимся.'
+ENTER_NAME = 'Пожалуйста, введите ваше имя.'
+ENTER_REAL_NAME = 'Пожалуйста, введите ваше настоящее имя.'
+ENTER_AGE = 'Пожалуйста, введите ваш возраст.'
+ENTER_REAL_AGE = 'Пожалуйста, введите ваш настоящий возраст.'
+NICE_TO_MEET = '{}, приятно познакомиться!'
+
 
 @router.message(NewUser.name_input, F.text)
 @log_dec(logger)
@@ -27,17 +34,17 @@ async def name_input(
         session: AsyncSession
 ):
     if await state.get_state() != NewUser.name_input:
-        await send_message_and_sleep(message, 'Давайте познакомимся')
-        await message.answer('Пожалуйста, введите ваше имя')
+        await answer_with_delay(message, state, ACQUAINTANCE)
+        await answer_with_delay(message, state, ENTER_NAME)
         await state.set_state(NewUser.name_input)
         return
 
     pattern = rf'^\D{{{MIN_NAME_LENGTH},{MAX_NAME_LENGTH}}}$'
     if not re.match(pattern, message.text):
-        await message.answer('Пожалуйста, введите ваше настоящее имя.')
+        await answer_with_delay(message, state, ENTER_REAL_NAME)
         return
 
-    await state.set_data(dict(name=message.text))
+    await state.update_data({'user': dict(name=message.text)})
     await age_input(message, state, session)
 
 
@@ -49,7 +56,7 @@ async def age_input(
         session: AsyncSession
 ):
     if await state.get_state() != NewUser.age_input:
-        await message.answer('Пожалуйста, введите ваш возраст.')
+        await answer_with_delay(message, state, ENTER_AGE)
         await state.set_state(NewUser.age_input)
         return
 
@@ -58,21 +65,18 @@ async def age_input(
         message.text.isdecimal() and
         (int(message.text) <= MIN_AGE or int(message.text) > MAX_AGE)
     ):
-        await message.answer('Пожалуйста, введите ваш настоящий возраст.')
+        await answer_with_delay(message, state, ENTER_REAL_AGE)
         return
 
     # сохраняем пользователя
+    state_data = await state.get_data()
     user = {
         'id': message.from_user.id,
-        **await state.get_data(),
+        **state_data['user'],
         'age': int(message.text)
     }
     await user_crud.create(user, session)
 
-    await send_message_and_sleep(
-        message,
-        f'{user["name"]}, приятно познакомиться.'
-    )
-
-    await state.clear()
+    await answer_with_delay(message, state, NICE_TO_MEET.format(user['name']))
+    await reset_state(state, next_delay=1)
     await route_selection(message, state, session)
