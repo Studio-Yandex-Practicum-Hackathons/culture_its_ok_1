@@ -7,8 +7,8 @@ from aiogram.fsm import context
 from core.exceptions import LogicalError
 from core.logger import log_dec, logger_factory
 from core.states import Route
-from core.utils import (delete_inline_keyboard, delete_keyboard,
-                        send_message_and_sleep, send_photo_and_sleep)
+from core.utils import (answer_photo_with_delay, answer_with_delay,
+                        delete_inline_keyboard, delete_keyboard, reset_state)
 from db.crud import progress_crud, route_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
@@ -41,7 +41,7 @@ async def route_selection(
         {'is_active': True}, session, sort='id asc'
     )
     if not db_routes:
-        await message.answer(NO_ROUTES)
+        await answer_with_delay(message, state, NO_ROUTES)
         return
 
     routes = {route.name: route for route in db_routes[:3] if route.objects}
@@ -49,7 +49,8 @@ async def route_selection(
     if await state.get_state() != Route.selection:
         await state.set_state(Route.selection)
         keyboard = get_reply_keyboard(*routes.keys(), adjust=1)
-        await message.answer(ROUTE_SELECTION, reply_markup=keyboard)
+        await answer_with_delay(message, state, ROUTE_SELECTION,
+                                reply_markup=keyboard)
         return
 
     if message.text in routes:
@@ -59,9 +60,11 @@ async def route_selection(
             text=START_MEDITATION, callback_data=f'route${current_route.id}'
         )
 
-        await send_photo_and_sleep(message, current_route.photo)
-        await send_message_and_sleep(message, current_route.description)
-        await message.answer(
+        await answer_photo_with_delay(message, state, current_route.photo)
+        await answer_with_delay(message, state, current_route.description)
+        await answer_with_delay(
+            message,
+            state,
             ROUTE_START_POINT.format(address=current_route.address),
             reply_markup=keyboard
         )
@@ -97,7 +100,7 @@ async def route_start(
     )
     progress_db = await progress_crud.create(progress, session)
 
-    await state.set_data({
+    await state.update_data({
         'route_id': route_id,
         'current_step': 0,
         'steps': steps,
@@ -122,6 +125,7 @@ async def route_follow(
     # него inline-кнопки
     last_message = None
 
+    # TODO: сделать проверку на on_route
     while state_data['current_step'] < len(state_data['steps']):
         step = state_data['steps'][state_data['current_step']]
         state_data['current_step'] += 1
@@ -134,14 +138,14 @@ async def route_follow(
         )
 
         if step.type == 'text':
-            last_message = await send_message_and_sleep(
-                message, step.content, step.delay_after_display
+            last_message = await answer_with_delay(
+                message, state, step.content, step.delay_after_display
             )
             continue
 
         if step.type == 'photo':
-            last_message = await send_photo_and_sleep(
-                message, step.photo, step.delay_after_display
+            last_message = await answer_photo_with_delay(
+                message, state, step.photo, step.delay_after_display
             )
             continue
 
@@ -153,22 +157,23 @@ async def route_follow(
 
             await last_message.edit_reply_markup(reply_markup=keyboard)
             await state.set_state(Route.search)
-            await state.set_data(state_data)
+            await state.update_data({'next_delay': 0, **state_data})
             return
 
         if step.type == 'reflection':
-            await message.answer(step.content)
+            await answer_with_delay(message, state, step.content, delay=0)
             await state.set_state(Route.reflection)
-            await state.set_data(state_data)
+            await state.update_data({'next_delay': 0, **state_data})
             return
 
     # маршрут окончен, сохраняем прогресс и очищаем состояние
+    # TODO: сделать проверку на on_route
     await progress_crud.update_by_attribute(
         {'id': state_data['progress_id']},
         {'finished_at': datetime.now()},
         session
     )
-    await state.clear()
+    await reset_state(state, next_delay=1)
 
     await route_selection(message, state, session)
 

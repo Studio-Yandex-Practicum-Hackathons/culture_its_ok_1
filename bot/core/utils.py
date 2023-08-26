@@ -2,43 +2,101 @@ import re
 from asyncio import sleep
 
 from aiogram import types
+from aiogram.fsm import context
 from core.config import MEDIA_DIR, settings
 
 EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+CHAT_ACTION_PERIOD = 5
+
+
+async def reset_state(
+        state: context.FSMContext,
+        next_delay: int | None = None
+):
+    """Функция сбрасывает состояние state, кроме его значения next_delay,
+    которое берётся либо из самого состояния, либо из переданной переменной
+    next_delay."""
+    state_data = await state.get_data()
+    if next_delay is None:
+        next_delay = state_data['next_delay']
+    await state.clear()
+    await state.set_data({'next_delay': next_delay})
+
+
+async def delay_with_chat_action(
+        message: types.Message,
+        delay: int,
+        chat_action: str
+):
+    """Т.к. отправка действия пользователю о том, что "бот печатает" или
+    "бот загружает фото" имеет срок действия около 5 секунд, функция спит delay
+    секунд, но при этом обновляет отправленное действие каждые 5 секунд"""
+    delays = [CHAT_ACTION_PERIOD] * (delay // CHAT_ACTION_PERIOD)
+    if delay % CHAT_ACTION_PERIOD:
+        delays.append(delay % CHAT_ACTION_PERIOD)
+
+    for delay in delays:
+        await message.bot.send_chat_action(chat_id=message.chat.id,
+                                           action=chat_action)
+        await sleep(delay)
+
+
+async def answer_with_delay(
+    message: types.Message,
+    state: context.FSMContext,
+    text: str,
+    next_delay: int | None = None,
+    **kwargs
+):
+    """Функция отправляет текст с предварительной задержкой, равной времени
+    прочтения текста/просмотра фотографии пользователем, отправленных
+    в предыдущем сообщении. При этом, во время задержки пользователю
+    отправляется уведомление, что бот печатает. Переменная next_delay отвечает
+    за задержку перед показом следующего сообщения."""
+    state_data = await state.get_data()
+    await delay_with_chat_action(message, state_data['next_delay'], 'typing')
+
+    if next_delay is None:
+        next_delay = text_reading_time(text)
+    await state.update_data({'next_delay': next_delay})
+
+    return await message.answer(text, **kwargs)
+
+
+async def answer_photo_with_delay(
+    message: types.Message,
+    state: context.FSMContext,
+    photo_path: str,
+    next_delay: int | None = None,
+    **kwargs
+):
+    """Функция отправляет фотографию с предварительной задержкой, равной
+    времени прочтения текста/просмотра фотографии пользователем, отправленных
+    в предыдущем сообщении. При этом, во время задержки пользователю
+    отправляется уведомление, что бот загружает фото. Переменная next_delay
+    отвечает за задержку перед показом следующего сообщения."""
+    state_data = await state.get_data()
+    await delay_with_chat_action(message, state_data['next_delay'],
+                                 'upload_photo')
+
+    if next_delay is None:
+        next_delay = settings.bot.photo_showing_delay
+    await state.update_data({'next_delay': next_delay})
+
+    return await message.answer_photo(
+        types.FSInputFile(MEDIA_DIR / photo_path),
+        **kwargs
+    )
 
 
 async def send_message_and_sleep(
     message: types.Message,
     text: str,
-    delay: int | None = None,
+    delay: int = 1,
     **kwargs
 ):
-    """Функция отправляет сообщение и засыпает на delay секунд. Если delay
-    не установлен, функция засыпает время, необходимое для прочтения сообщения
-    со скоростью, которая установлена в настройках бота."""
-    if delay is None:
-        delay = text_reading_time(text)
+    """Функция отправляет сообщение и засыпает на delay секунд."""
     result = await message.answer(text, **kwargs)
-    await sleep(delay)
-    return result  # noqa: R504
-
-
-async def send_photo_and_sleep(
-    message: types.Message,
-    photo_path: str,
-    delay: int | None = None,
-    **kwargs
-):
-    """Функция отправляет фотографию и засыпает на delay секунд. Если delay
-    не установлен, функция засыпает на то время, которое установлено в
-    настройках бота."""
-    if delay is None:
-        delay = settings.bot.photo_showing_delay
-
-    result = await message.answer_photo(
-        types.FSInputFile(MEDIA_DIR / photo_path),
-        **kwargs
-    )
     await sleep(delay)
     return result  # noqa: R504
 
@@ -47,7 +105,7 @@ async def delete_keyboard(
         message: types.Message,
 ):
     """Функция удаляет обычную клавиатуру. Телеграм не позволяет удалять такую
-    клавиатуру без отправки сообщения пользователю, поэтому, после отправки
+    клавиатуру без отправки сообщения пользователю, поэтому после отправки
     сообщение-пустышка сразу удаляется."""
     msg = await message.answer('...', reply_markup=types.ReplyKeyboardRemove())
     await msg.delete()
@@ -65,14 +123,13 @@ def text_reading_time(
         words_per_minute: int = settings.bot.words_per_minute
 ) -> int:
     """
-    Функция возвращает время в секундах, необходимое для прочтения текста
-    пользователем.
-    :param text: Читаемый текст
-    :param words_per_minute: Скорость чтения (слов в минуту)
-    :return: Время чтения в секундах
-    """
+    Функция возвращает время в секундах, необходимое для прочтения текста text
+    человеком со скоростью words_per_minute (слов в минуту). Минимальное время
+    чтения текста любого размера - 1 секунда"""
     return max(1, int(len(text.split()) / words_per_minute * 60))
 
 
 def check_is_email(email: str) -> bool:
+    """Функция проверяет, является ли email валидным адресом электронной
+    почты."""
     return bool(re.fullmatch(EMAIL_REGEX, email))

@@ -19,6 +19,7 @@ REPORT_TYPES = {
     1: 'Сводный отчёт с рефлексией',
     2: 'Сводный отчёт без рефлексии'
 }
+EXIT_CALLBACK = 'exit'
 
 ENTER_INSTRUCTION = ('Для доступа в административную зону введите команду:\n'
                      '/admin <i>ваш_пароль</i>')
@@ -45,6 +46,17 @@ REPORT_PREPARING = ('Отчёт готовится. Пожалуйста, под
 REPORT_READY = 'Отчёт сформирован. Для доступа к нему перейдите по ссылке:'
 
 
+@router.message(Command('exit'))
+@log_dec(logger)
+async def cmd_exit(
+        message: types.Message,
+        state: context.FSMContext
+):
+    await state.clear()
+    await message.answer(ADMIN_EXIT_CONFIRMATION,
+                         reply_markup=types.ReplyKeyboardRemove())
+
+
 @router.message(Command('admin'))
 @log_dec(logger)
 async def cmd_admin(
@@ -53,16 +65,19 @@ async def cmd_admin(
         session: AsyncSession,
         command: CommandObject
 ):
+    await state.clear()
 
     if command.args is None:
         await message.answer(
-            ENTER_INSTRUCTION, reply_markup=types.ReplyKeyboardRemove()
+            ENTER_INSTRUCTION,
+            reply_markup=types.ReplyKeyboardRemove()
         )
         return
 
     if command.args != settings.bot.admin_password.get_secret_value():
         await message.answer(
-            WRONG_PASSWORD, reply_markup=types.ReplyKeyboardRemove()
+            WRONG_PASSWORD,
+            reply_markup=types.ReplyKeyboardRemove()
         )
         return
 
@@ -86,8 +101,9 @@ async def admin_welcome(
     }
 
     await message.answer(
-        SELECT_ROUTE, reply_markup=get_inline_keyboard(
-            {**routes, ADMIN_EXIT: 'quit'}, adjust=1
+        SELECT_ROUTE,
+        reply_markup=get_inline_keyboard(
+            {**routes, ADMIN_EXIT: EXIT_CALLBACK}, adjust=1
         )
     )
 
@@ -107,7 +123,7 @@ async def route_selection(
     ]
 
     if route_id in route_ids:
-        await state.set_data({'route_id': route_id})
+        await state.update_data({'route_id': route_id})
 
         reports = {
             report_name: f'report${report_id}'
@@ -121,9 +137,9 @@ async def route_selection(
         await state.set_state(Admin.report_selection)
 
 
-@router.callback_query(Admin.route_selection, F.data == 'quit')
+@router.callback_query(Admin.route_selection, F.data == EXIT_CALLBACK)
 @log_dec(logger)
-async def admin_quit(
+async def admin_exit(
         callback: types.CallbackQuery,
         state: context.FSMContext
 ):
@@ -155,7 +171,6 @@ async def period_selection(
         message: types.Message,
         state: context.FSMContext
 ):
-
     try:
         start, end = (value.strip() for value in message.text.split('-'))
     except ValueError:
@@ -167,7 +182,7 @@ async def period_selection(
             for date in (start, end)
         ]
     except (ValueError, TypeError):
-        await message.answer(BAD_DATE_FORMAT)
+        await send_message_and_sleep(message, BAD_DATE_FORMAT)
         await message.answer(ENTER_PERIOD)
         return
 
@@ -202,6 +217,6 @@ async def email_input(
     report_url = 'Здесь будет ссылка на гугл-таблицу'
 
     await message.answer(REPORT_READY)
-    await message.answer(report_url)
+    await send_message_and_sleep(message, report_url, 3)
     await state.clear()
     await admin_welcome(message, state, session)
