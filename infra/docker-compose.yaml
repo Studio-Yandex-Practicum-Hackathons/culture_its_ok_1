@@ -6,8 +6,6 @@ services:
     container_name: culture-postgres
     hostname: ${POSTGRES_HOST}
     restart: on-failure
-    ports:
-      - ${POSTGRES_PORT}:${POSTGRES_PORT}
     expose:
       - ${POSTGRES_PORT}
     volumes:
@@ -34,15 +32,13 @@ services:
       - ./env/.general
 
   django:
-    build: ../admin-panel
+    image: dcomrad/culture-django
     container_name: culture-admin
     restart: on-failure
     hostname: ${DJANGO_HOST}
     depends_on:
       - postgres
     entrypoint: /app/docker-entrypoint.sh
-    ports:
-      - ${DJANGO_PORT}:${DJANGO_PORT}
     expose:
       - ${DJANGO_PORT}
     volumes:
@@ -53,21 +49,21 @@ services:
       - ./env/.django
       - ./env/.postgres
 
-#  bot:
-#    build: ../bot
-#    container_name: culture-bot
-#    restart: on-failure
-#    depends_on:
-#      - postgres
-#    entrypoint: /app/docker-entrypoint.sh
-#    volumes:
-#      - culture_media_data:/app/media/
-#    env_file:
-#      - ./env/.general
-#      - ./env/.bot
-#      - ./env/.postgres
-#      - ./env/.sentry
-#      - ./env/.google
+  bot:
+    image: dcomrad/culture-bot
+    container_name: culture-bot
+    restart: on-failure
+    depends_on:
+      - postgres
+    entrypoint: /app/docker-entrypoint.sh
+    volumes:
+      - culture_media_data:/app/media/
+    env_file:
+      - ./env/.general
+      - ./env/.bot
+      - ./env/.postgres
+      - ./env/.sentry
+      - ./env/.google
 
 volumes:
   culture_postgresql_data:

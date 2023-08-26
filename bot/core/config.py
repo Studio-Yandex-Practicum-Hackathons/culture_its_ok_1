@@ -23,8 +23,8 @@ class EnvBase(BaseSettings):
 class BotSettings(EnvBase):
     telegram_token: str
     debug: bool
-    words_per_minute: int = 250  # скорость чтения текста, слов в минуту
-    photo_showing_delay: int = 5  # задержка в секундах при показе фотографий
+    words_per_minute: int
+    photo_showing_delay: int
 
 
 class PostgresSettings(EnvBase):
@@ -43,6 +43,10 @@ class SentrySettings(EnvBase):
 
 
 class LoggingSettings(EnvBase):
+    def __init__(self):
+        os.makedirs(LOG_DIR, exist_ok=True)
+        super().__init__()
+
     log_file: pathlib.Path = LOG_DIR / 'bot.log'
     log_format: str = '"%(asctime)s - [%(levelname)s] - %(message)s"'
     dt_format: str = '%d.%m.%Y %H:%M:%S'
