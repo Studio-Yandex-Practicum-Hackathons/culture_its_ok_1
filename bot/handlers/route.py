@@ -1,15 +1,17 @@
 import re
 from datetime import datetime
+from random import choice
 
 from aiogram import F, Router, types
 from aiogram.filters.command import Command
 from aiogram.fsm import context
+from core.config import PRIVATE_DIR, settings
 from core.exceptions import LogicalError
 from core.logger import log_dec, logger_factory
 from core.states import Route
 from core.utils import (answer_photo_with_delay, answer_with_delay,
                         delete_inline_keyboard, delete_keyboard, reset_state)
-from db.crud import progress_crud, route_crud
+from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
                               get_yes_no_inline_keyboard)
@@ -25,6 +27,13 @@ ROUTE_SELECTION = (
 )
 START_MEDITATION = 'Начать медитацию'
 ROUTE_START_POINT = 'Медитация начинается по адресу:\n{address}'
+
+FOUND_BUTTONS = [
+    'Теперь нашёл!',
+    'Я на месте',
+    'Я добрался!',
+    'Нашёл, всё в порядке',
+]
 
 
 @router.message(Route.selection, F.text, ~Command(re.compile(r'^.+$')))
@@ -44,7 +53,7 @@ async def route_selection(
         await answer_with_delay(message, state, NO_ROUTES)
         return
 
-    routes = {route.name: route for route in db_routes[:3] if route.objects}
+    routes = {route.name: route for route in db_routes[:3] if route.stages}
 
     if await state.get_state() != Route.selection:
         await state.set_state(Route.selection)
@@ -88,15 +97,15 @@ async def route_start(
     route = await route_crud.get(route_id, session)
 
     steps = []
-    for _object in route.objects:
-        for step in _object.steps:
-            step.object_id = _object.id
+    for stage in route.stages:
+        for step in stage.steps:
+            step.stage_id = stage.id
             steps.append(step)
 
     progress = dict(
         user_id=callback.from_user.id,
         route_id=route_id,
-        object_id=steps[0].object_id,
+        stage_id=steps[0].stage_id,
     )
     progress_db = await progress_crud.create(progress, session)
 
@@ -133,7 +142,7 @@ async def route_follow(
         # записали в БД текущий прогресс
         await progress_crud.update_by_attribute(
             {'id': state_data['progress_id']},
-            {'object_id': step.object_id},
+            {'stage_id': step.stage_id},
             session
         )
 
@@ -173,7 +182,7 @@ async def route_follow(
         {'finished_at': datetime.now()},
         session
     )
-    await reset_state(state, next_delay=3)
+    await reset_state(state)
 
     await route_selection(message, state, session)
 
@@ -185,7 +194,38 @@ async def route_reflection(
         state: context.FSMContext,
         session: AsyncSession
 ):
-    # TODO: сохраняем рефлексию в базу
+    state_data = await state.get_data()
+    step = state_data['steps'][state_data['current_step'] - 1]
+
+    if message.text:
+        answer_type = 'text'
+        answer_content = message.text[:settings.bot.reflection_length_limit]
+    else:
+        filename = (f'user{message.from_user.id}+'
+                    f'route{state_data["route_id"]}+'
+                    f'stage{step.stage_id}+'
+                    f'{datetime.now().strftime("%d.%m.%Y_%H-%M-%S")}.mp3')
+        await message.bot.download(
+            message.voice,
+            destination=PRIVATE_DIR / filename
+        )
+        answer_type = 'voice'
+        answer_content = filename
+
+    route = await route_crud.get(state_data['route_id'], session)
+    stage = await stage_crud.get(step.stage_id, session)
+
+    await reflection_crud.create(
+        {
+            'user_id': message.from_user.id,
+            'route_name': route.name,
+            'stage_name': stage.name,
+            'question': step.content,
+            'answer_type': answer_type,
+            'answer_content': answer_content
+        },
+        session
+    )
     await route_follow(message, state, session)
 
 
@@ -202,5 +242,15 @@ async def route_search(
     if callback.data == CALLBACK_YES:
         await route_follow(callback.message, state, session)
     else:
-        # TODO: даём пользователю больше информации о местоположении объекта
-        pass
+        state_data = await state.get_data()
+        step = state_data['steps'][state_data['current_step'] - 1]
+        stage = await stage_crud.get(step.stage_id, session)
+        await answer_with_delay(
+            callback.message,
+            state,
+            stage.how_to_get,
+            reply_markup=get_one_button_inline_keyboard(
+                choice(FOUND_BUTTONS), CALLBACK_YES
+            ),
+            next_delay=0
+        )

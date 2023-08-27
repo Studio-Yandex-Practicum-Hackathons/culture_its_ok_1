@@ -37,16 +37,10 @@ class Route(models.Model):
             resize_photo(self.photo.path)
 
 
-class Object(models.Model):
+class Stage(models.Model):
     name = models.CharField(
         max_length=255,
         verbose_name='Название'
-    )
-    author = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True,
-        verbose_name='Автор',
     )
     address = models.CharField(
         max_length=255,
@@ -65,8 +59,8 @@ class Object(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Объект'
-        verbose_name_plural = 'Объекты'
+        verbose_name = 'Этап'
+        verbose_name_plural = 'Этапы'
         ordering = ('name',)
 
     def __str__(self):
@@ -121,33 +115,33 @@ class Step(models.Model):
             resize_photo(self.photo.path)
 
 
-class RouteObject(models.Model):
+class RouteStage(models.Model):
     route = models.ForeignKey(
         Route,
         on_delete=models.CASCADE,
         verbose_name='Маршрут'
     )
-    object = models.ForeignKey(  # noqa: VNE003
-        Object,
+    stage = models.ForeignKey(  # noqa: VNE003
+        Stage,
         on_delete=models.CASCADE,
-        verbose_name='Объект'
+        verbose_name='Этап'
     )
-    object_priority = models.IntegerField(
-        verbose_name='Приоритет объекта'
+    stage_priority = models.IntegerField(
+        verbose_name='Приоритет этапа'
     )
 
     class Meta:
-        ordering = ('object_priority',)
+        ordering = ('stage_priority',)
 
     def __str__(self):
-        return self.object.name
+        return self.stage.name
 
 
-class ObjectStep(models.Model):
-    object = models.ForeignKey(  # noqa: VNE003
-        Object,
+class StageStep(models.Model):
+    stage = models.ForeignKey(
+        Stage,
         on_delete=models.CASCADE,
-        verbose_name='Объект'
+        verbose_name='Этап'
     )
     step = models.ForeignKey(
         Step,
@@ -197,10 +191,10 @@ class Progress(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Маршрут'
     )
-    object = models.ForeignKey(  # noqa: VNE003
-        Object,
+    stage = models.ForeignKey(
+        Stage,
         on_delete=models.CASCADE,
-        verbose_name='Объект'
+        verbose_name='Этап'
     )
     started_at = models.DateTimeField(
         auto_now_add=True,
@@ -229,19 +223,23 @@ class Reflection(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
     )
-    route = models.CharField(
+    route_name = models.CharField(
         max_length=255,
         verbose_name='Название маршрута'
     )
-    object = models.CharField(  # noqa: VNE003
+    stage_name = models.CharField(
         max_length=255,
-        verbose_name='Название объекта'
+        verbose_name='Название этапа'
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания рефлексии'
     )
     question = models.CharField(
         max_length=255,
         verbose_name='Вопрос для рефлексии'
     )
-    answer_type = models.CharField(  # noqa: VNE003
+    answer_type = models.CharField(
         max_length=10,
         choices=TYPE_CHOICES,
         verbose_name='Тип ответа'

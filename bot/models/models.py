@@ -14,39 +14,37 @@ class Route(Base):
     is_active = Column(Boolean, default=False)
 
     @property
-    def objects(self):
-        """Метод возвращает список активных объектов маршрута, проходя сквозь
+    def stages(self):
+        """Метод возвращает список активных этапов маршрута, проходя сквозь
         m2m таблицу."""
         return [
-            _object.object
-            for _object in self._objects if _object.object.is_active
+            _stage.stage
+            for _stage in self._stages if _stage.stage.is_active
         ]
 
-    _objects = relationship('RouteObject', lazy="joined",
-                            order_by='asc(RouteObject.object_priority)')
+    _stages = relationship('RouteStage', lazy="joined",
+                           order_by='asc(RouteStage.stage_priority)')
 
     def __repr__(self):
         return f'Маршрут ({self.name})'
 
 
-class Object(Base):
+class Stage(Base):
     name = Column(String(255), nullable=False)
-    author = Column(String(255))
     address = Column(String(255))
     how_to_get = Column(Text)
     is_active = Column(Boolean, default=False)
 
     @property
     def steps(self):
-        """Метод возвращает список шагов объекта, проходя сквозь m2m
-        таблицу."""
+        """Метод возвращает список шагов этапа, проходя сквозь m2m таблицу."""
         return [_step.step for _step in self._steps]
 
-    _steps = relationship('ObjectStep', lazy="joined",
-                          order_by='asc(ObjectStep.step_priority)')
+    _steps = relationship('StageStep', lazy="joined",
+                          order_by='asc(StageStep.step_priority)')
 
     def __repr__(self):
-        return f'Объект ({self.name})'
+        return f'Этап ({self.name})'
 
 
 class Step(Base):
@@ -70,16 +68,16 @@ class Step(Base):
         return f'Шаг ({to_show})'
 
 
-class RouteObject(Base):
+class RouteStage(Base):
     route_id = Column(ForeignKey('culture_route.id'), primary_key=True)
-    object_id = Column(ForeignKey('culture_object.id'), primary_key=True)
-    object_priority = Column(Integer, nullable=False)
+    stage_id = Column(ForeignKey('culture_stage.id'), primary_key=True)
+    stage_priority = Column(Integer, nullable=False)
 
-    object = relationship("Object", lazy="joined")  # noqa: VNE003
+    stage = relationship("Stage", lazy="joined")  # noqa: VNE003
 
 
-class ObjectStep(Base):
-    object_id = Column(ForeignKey('culture_object.id'), primary_key=True)
+class StageStep(Base):
+    stage_id = Column(ForeignKey('culture_stage.id'), primary_key=True)
     step_id = Column(ForeignKey('culture_step.id'), primary_key=True)
     step_priority = Column(Integer, nullable=False, primary_key=True)
 
@@ -98,7 +96,7 @@ class User(Base):
 class Progress(Base):
     user_id = Column(ForeignKey('culture_user.id'), primary_key=True)
     route_id = Column(ForeignKey('culture_route.id'), primary_key=True)
-    object_id = Column(ForeignKey('culture_object.id'), primary_key=True)
+    stage_id = Column(ForeignKey('culture_stage.id'), primary_key=True)
     started_at = Column(DateTime, nullable=False, default=datetime.now)
     finished_at = Column(DateTime)
     rating = Column(Integer)
@@ -112,7 +110,8 @@ class Reflection(Base):
 
     user_id = Column(ForeignKey('culture_user.id'))
     route_name = Column(String(255), nullable=False)
-    object_name = Column(String(255), nullable=False)
+    stage_name = Column(String(255), nullable=False)
+    created = Column(DateTime, nullable=False, default=datetime.now)
     question = Column(String(255), nullable=False)
     answer_type = Column(String(10), info={'choices': TYPE_CHOICES},
                          nullable=False)  # noqa: VNE003

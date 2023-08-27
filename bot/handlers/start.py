@@ -30,7 +30,7 @@ async def cmd_start(
 
     user = await user_crud.get(message.from_user.id, session)
     if user and message.from_user.id == user.id:
-        await answer_with_delay(message, state, GREETING.format(user.name))
+        await answer_with_delay(message, state, GREETING.format(user.name), 2)
         await route_selection(message, state, session)
         return
 
