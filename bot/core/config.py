@@ -12,6 +12,7 @@ IN_DOCKER: bool = os.getenv('AM_I_IN_A_DOCKER_CONTAINER', False) == 'YES'
 BASE_DIR: pathlib.Path = Path(__file__).parent.parent
 LOG_DIR: pathlib.Path = BASE_DIR / 'logs'
 MEDIA_DIR: pathlib.Path = BASE_DIR / 'media'
+PRIVATE_DIR: pathlib.Path = BASE_DIR / 'private'
 
 
 class EnvBase(BaseSettings):
@@ -26,6 +27,7 @@ class BotSettings(EnvBase):
     admin_password: SecretStr
     words_per_minute: int
     photo_showing_delay: int
+    reflection_length_limit: int
 
 
 class PostgresSettings(EnvBase):

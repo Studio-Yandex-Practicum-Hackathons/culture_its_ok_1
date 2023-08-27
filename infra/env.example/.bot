@@ -2,4 +2,5 @@ TELEGRAM_TOKEN=<telegram token>
 DEBUG=FALSE
 WORDS_PER_MINUTE=250  # скорость чтения текста, слов в минуту
 PHOTO_SHOWING_DELAY=5  # задержка в секундах при показе фотографий
-ADMIN_PASSWORD=flvbybcnhfnjh
+REFLECTION_LENGTH_LIMIT=1000  # предельная длина текста рефлексии
+ADMIN_PASSWORD=password  # пароль от административной зоны

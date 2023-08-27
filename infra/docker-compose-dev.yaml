@@ -62,6 +62,7 @@ services:
 #    entrypoint: /app/docker-entrypoint.sh
 #    volumes:
 #      - culture_media_data:/app/media/
+#      - culture_private_data:/app/private/
 #    env_file:
 #      - ./env/.general
 #      - ./env/.bot
@@ -73,3 +74,4 @@ volumes:
   culture_postgresql_data:
   culture_static_data:
   culture_media_data:
+  culture_private_data:
