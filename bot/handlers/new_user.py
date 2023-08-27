@@ -78,5 +78,5 @@ async def age_input(
     await user_crud.create(user, session)
 
     await answer_with_delay(message, state, NICE_TO_MEET.format(user['name']))
-    await reset_state(state, next_delay=1)
+    await reset_state(state, next_delay=2)
     await route_selection(message, state, session)

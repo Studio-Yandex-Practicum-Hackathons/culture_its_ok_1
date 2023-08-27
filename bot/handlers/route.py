@@ -5,18 +5,18 @@ from random import choice
 from aiogram import F, Router, types
 from aiogram.filters.command import Command
 from aiogram.fsm import context
+from core.config import PRIVATE_DIR, settings
 from core.exceptions import LogicalError
 from core.logger import log_dec, logger_factory
 from core.states import Route
 from core.utils import (answer_photo_with_delay, answer_with_delay,
                         delete_inline_keyboard, delete_keyboard, reset_state)
-from db.crud import progress_crud, route_crud, stage_crud, reflection_crud
+from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
                               get_yes_no_inline_keyboard)
 from keyboards.reply import get_reply_keyboard
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.config import PRIVATE_DIR, settings
 
 router = Router()
 logger = logger_factory(__name__)

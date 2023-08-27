@@ -1,20 +1,20 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 
-from .models import Object, ObjectStep, Route, RouteObject, Step
+from .models import Route, RouteStage, Stage, StageStep, Step
 
 
-class RouteObjectInline(admin.TabularInline):
-    verbose_name = 'Объект'
-    verbose_name_plural = 'Объекты'
-    model = RouteObject
+class RouteStageInline(admin.TabularInline):
+    verbose_name = 'Этап'
+    verbose_name_plural = 'Этапы'
+    model = RouteStage
     extra = 3
 
 
-class ObjectStepInline(admin.TabularInline):
+class StageStepInline(admin.TabularInline):
     verbose_name = 'Шаг'
     verbose_name_plural = 'Шаги'
-    model = ObjectStep
+    model = StageStep
     extra = 3
 
 
@@ -23,14 +23,14 @@ class RouteAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('name', 'address')
-    inlines = [RouteObjectInline]
+    inlines = [RouteStageInline]
 
 
-@admin.register(Object)
-class ObjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', 'address')
-    search_fields = ('name', 'author', 'address')
-    inlines = [ObjectStepInline]
+@admin.register(Stage)
+class StageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'address')
+    search_fields = ('name', 'address')
+    inlines = [StageStepInline]
 
 
 @admin.register(Step)
