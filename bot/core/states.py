@@ -11,6 +11,7 @@ class Route(state.StatesGroup):
     following = state.State()
     reflection = state.State()
     search = state.State()
+    rate = state.State()
 
 
 class Admin(state.StatesGroup):

@@ -22,12 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = Router()
 logger = logger_factory(__name__)
 
-NO_ROUTES = 'К сожалению, на данный момент нет ни одного активного маршрута'
-ROUTE_SELECTION = (
-    'Выберите маршрут из списка ниже, чтобы посмотреть его подробное описание'
-)
-START_MEDITATION = 'Начать медитацию'
-ROUTE_START_POINT = 'Медитация начинается по адресу:\n{address}'
+MIN_RATE = 1
+MAX_RATE = 10
 
 FOUND_BUTTONS = [
     'Теперь нашёл!',
@@ -35,6 +31,25 @@ FOUND_BUTTONS = [
     'Я добрался!',
     'Нашёл, всё в порядке',
 ]
+
+# ----------------------
+NO_ROUTES = 'К сожалению, на данный момент нет ни одного активного маршрута'
+ROUTE_SELECTION = ('Выберите маршрут из списка ниже, чтобы посмотреть его '
+                   'подробное описание')
+START_MEDITATION = 'Начать медитацию'
+ROUTE_START_POINT = 'Медитация начинается по адресу:\n{}'
+MEDITATION_ENDED = ('На этом, медитация по маршруту «{}» окончена. '
+                    'Администрация фестиваля «Ничего страшного» благодарит '
+                    'вас за использование нашего бота!')
+
+RATE_ROUTE = ('Нам очень важна обратная связь наших пользователей. '
+              'Пожалуйста, оцените пройденный маршрут по шкале от '
+              f'{MIN_RATE} до {MAX_RATE}.')
+WRONG_RATE = f'Пожалуйста, введите число от {MIN_RATE} до {MAX_RATE}.'
+HIGH_RATE = 'Спасибо за столь высокую оценку нашей работы!'
+MEDIUM_RATE = 'Спасибо за вашу оценку. Мы будем стараться быть лучше!'
+LOW_RATE = 'Спасибо за вашу оценку. Жаль, что ваши ожидания не оправдались.'
+# ----------------------
 
 
 @router.message(Route.selection, F.text, ~Command(re.compile(r'^.+$')))
@@ -78,7 +93,7 @@ async def route_selection(
         await answer_with_delay(
             message,
             state,
-            ROUTE_START_POINT.format(address=current_route.address),
+            ROUTE_START_POINT.format(current_route.address),
             reply_markup=get_one_button_inline_keyboard(
                 text=START_MEDITATION,
                 callback_data=f'route${current_route.id}'
@@ -189,9 +204,10 @@ async def route_follow(
         {'finished_at': datetime.now()},
         session
     )
-    await reset_state(state)
-
-    await route_selection(message, state, session)
+    route = await route_crud.get(state_data['route_id'], session)
+    await answer_with_delay(message, state,
+                            MEDITATION_ENDED.format(route.name))
+    await route_rate(message, state, session)
 
 
 @router.message(Route.reflection, F.text | F.voice)
@@ -261,3 +277,42 @@ async def route_search(
             ),
             next_delay=0
         )
+
+
+@router.message(Route.rate, F.text)
+@log_dec(logger)
+async def route_rate(
+        message: types.Message,
+        state: context.FSMContext,
+        session: AsyncSession
+):
+    if await state.get_state() != Route.rate:
+        await state.set_state(Route.rate)
+        await answer_with_delay(message, state, RATE_ROUTE)
+        return
+
+    if (
+        not message.text.isdecimal() or
+        (int(message.text) < MIN_RATE or int(message.text) > MAX_RATE)
+    ):
+        await answer_with_delay(message, state, WRONG_RATE)
+        return
+
+    rating = int(message.text)
+    if rating < 4:
+        await answer_with_delay(message, state, LOW_RATE)
+    elif rating > 7:
+        await answer_with_delay(message, state, HIGH_RATE)
+    else:
+        await answer_with_delay(message, state, MEDIUM_RATE)
+
+    #  заносим оценку пользователя в таблицу прогресса
+    state_data = await state.get_data()
+    await progress_crud.update_by_attribute(
+        {'id': state_data['progress_id']},
+        {'rating': rating},
+        session
+    )
+
+    await reset_state(state)
+    await route_selection(message, state, session)
