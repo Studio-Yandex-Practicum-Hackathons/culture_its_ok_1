@@ -102,11 +102,11 @@ class Step(models.Model):
     class Meta:
         verbose_name = 'Шаг'
         verbose_name_plural = 'Шаги'
-        ordering = ('-pk',)
+        ordering = ('-type',)
 
     def __str__(self):
         to_show = f'{self.CHOICE_TO_TEXT[self.type]}: '
-        to_show += str(self.photo) if self.photo else f'{self.content[:20]}...'
+        to_show += str(self.photo) if self.photo else f'{self.content[:25]}...'
         return to_show
 
     def save(self, *args, **kwargs):

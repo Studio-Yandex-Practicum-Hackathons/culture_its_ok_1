@@ -1,11 +1,12 @@
 import re
+from uuid import uuid4
 from datetime import datetime
 from random import choice
 
 from aiogram import F, Router, types
 from aiogram.filters.command import Command
 from aiogram.fsm import context
-from core.config import PRIVATE_DIR, settings
+from core.config import VOICE_DIR, settings
 from core.exceptions import LogicalError
 from core.logger import log_dec, logger_factory
 from core.states import Route
@@ -57,25 +58,31 @@ async def route_selection(
 
     if await state.get_state() != Route.selection:
         await state.set_state(Route.selection)
-        keyboard = get_reply_keyboard(*routes.keys(), adjust=1)
-        await answer_with_delay(message, state, ROUTE_SELECTION,
-                                reply_markup=keyboard)
+        await answer_with_delay(
+            message,
+            state,
+            ROUTE_SELECTION,
+            reply_markup=get_reply_keyboard(*routes.keys(), adjust=1)
+        )
         return
 
     if message.text in routes:
         current_route = routes[message.text]
 
-        keyboard = get_one_button_inline_keyboard(
-            text=START_MEDITATION, callback_data=f'route${current_route.id}'
+        await answer_photo_with_delay(
+            message,
+            state,
+            current_route.photo,
+            current_route.description
         )
-
-        await answer_photo_with_delay(message, state, current_route.photo)
-        await answer_with_delay(message, state, current_route.description)
         await answer_with_delay(
             message,
             state,
             ROUTE_START_POINT.format(address=current_route.address),
-            reply_markup=keyboard
+            reply_markup=get_one_button_inline_keyboard(
+                text=START_MEDITATION,
+                callback_data=f'route${current_route.id}'
+            )
         )
 
 
@@ -130,11 +137,10 @@ async def route_follow(
 
     state_data = await state.get_data()
 
-    # нужно хранить последнее отправленное сообщение, чтобы редактировать у
-    # него inline-кнопки
+    # нужно хранить последнее отправленное сообщение, чтобы управлять им
     last_message = None
 
-    # TODO: сделать проверку на on_route
+    # TODO: сделать проверку, что пользователь не перезапустил маршрут
     while state_data['current_step'] < len(state_data['steps']):
         step = state_data['steps'][state_data['current_step']]
         state_data['current_step'] += 1
@@ -154,29 +160,30 @@ async def route_follow(
 
         if step.type == 'photo':
             last_message = await answer_photo_with_delay(
-                message, state, step.photo, step.delay_after_display
+                message, state, step.photo, step.content,
+                step.delay_after_display
             )
             continue
 
         if step.type == 'continue_button':
-            keyboard = get_yes_no_inline_keyboard(*step.content.split('\n'))
             if last_message is None:
                 err_msg = 'Кнопке обязательно должно предшествовать сообщение'
                 raise LogicalError(err_msg)
 
+            keyboard = get_yes_no_inline_keyboard(*step.content.split('\n'))
             await last_message.edit_reply_markup(reply_markup=keyboard)
+            await state.update_data({**state_data, 'next_delay': 0})
             await state.set_state(Route.search)
-            await state.update_data({'next_delay': 0, **state_data})
             return
 
         if step.type == 'reflection':
-            await answer_with_delay(message, state, step.content, delay=0)
+            await answer_with_delay(message, state, step.content)
+            await state.update_data({**state_data, 'next_delay': 0})
             await state.set_state(Route.reflection)
-            await state.update_data({'next_delay': 0, **state_data})
             return
 
     # маршрут окончен, сохраняем прогресс и очищаем состояние
-    # TODO: сделать проверку на on_route
+    # TODO: сделать проверку, что пользователь не перезапустил маршрут
     await progress_crud.update_by_attribute(
         {'id': state_data['progress_id']},
         {'finished_at': datetime.now()},
@@ -199,15 +206,14 @@ async def route_reflection(
 
     if message.text:
         answer_type = 'text'
-        answer_content = message.text[:settings.bot.reflection_length_limit]
+        answer_content = message.text[:settings.bot.reflection_text_limit]
     else:
-        filename = (f'user{message.from_user.id}+'
-                    f'route{state_data["route_id"]}+'
-                    f'stage{step.stage_id}+'
+        # TODO: обрезать аудиофайл до предельной длительности
+        filename = (f'{uuid4()}+'
                     f'{datetime.now().strftime("%d.%m.%Y_%H-%M-%S")}.mp3')
         await message.bot.download(
             message.voice,
-            destination=PRIVATE_DIR / filename
+            destination=VOICE_DIR / filename
         )
         answer_type = 'voice'
         answer_content = filename
@@ -215,6 +221,7 @@ async def route_reflection(
     route = await route_crud.get(state_data['route_id'], session)
     stage = await stage_crud.get(step.stage_id, session)
 
+    # TODO: распознать текст и записать в БД
     await reflection_crud.create(
         {
             'user_id': message.from_user.id,

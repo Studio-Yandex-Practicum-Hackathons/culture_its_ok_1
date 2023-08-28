@@ -64,7 +64,7 @@ class Step(Base):
 
     def __repr__(self):
         to_show = f'{self._CHOICE_TO_TEXT[self.type]}: '
-        to_show += str(self.photo) if self.photo else f'{self.content[:20]}...'
+        to_show += str(self.photo) if self.photo else f'{self.content[:25]}...'
         return f'Шаг ({to_show})'
 
 
