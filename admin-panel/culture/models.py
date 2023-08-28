@@ -162,7 +162,7 @@ class StageStep(models.Model):
 
 
 class User(models.Model):
-    id = models.IntegerField(  # noqa: VNE003
+    id = models.BigIntegerField(  # noqa: VNE003
         primary_key=True
     )
     name = models.CharField(

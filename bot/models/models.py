@@ -2,7 +2,7 @@ from datetime import datetime
 
 from db.postgres import Base
 from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
-                        Text)
+                        Text, BigInteger)
 from sqlalchemy.orm import relationship
 
 
@@ -85,6 +85,7 @@ class StageStep(Base):
 
 
 class User(Base):
+    id = Column(BigInteger, primary_key=True)
     name = Column(String(255), nullable=False)
     age = Column(Integer, nullable=False)
     interests = Column(String(255))
