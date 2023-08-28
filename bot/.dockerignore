@@ -1,5 +1,4 @@
 Dockerfile
-docker-entrypoint.sh
 env
 venv
 .venv

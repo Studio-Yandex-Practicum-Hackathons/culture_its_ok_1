@@ -1,5 +1,4 @@
 Dockerfile
-docker-entrypoint.sh
 db.sqlite3
 venv
 .venv
