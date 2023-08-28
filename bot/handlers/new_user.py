@@ -15,7 +15,7 @@ logger = logger_factory(__name__)
 MIN_NAME_LENGTH = 2
 MAX_NAME_LENGTH = 30
 
-MIN_AGE = 2
+MIN_AGE = 3
 MAX_AGE = 125
 
 ACQUAINTANCE = 'Давайте познакомимся.'
@@ -62,8 +62,7 @@ async def age_input(
 
     if (
         not message.text.isdecimal() or
-        message.text.isdecimal() and
-        (int(message.text) <= MIN_AGE or int(message.text) > MAX_AGE)
+        (int(message.text) < MIN_AGE or int(message.text) > MAX_AGE)
     ):
         await answer_with_delay(message, state, ENTER_REAL_AGE)
         return
