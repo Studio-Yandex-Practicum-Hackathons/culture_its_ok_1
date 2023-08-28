@@ -67,6 +67,7 @@ async def answer_photo_with_delay(
     message: types.Message,
     state: context.FSMContext,
     photo_path: str,
+    caption: str | None = None,
     next_delay: int | None = None,
     **kwargs
 ):
@@ -80,11 +81,12 @@ async def answer_photo_with_delay(
                                  'upload_photo')
 
     if next_delay is None:
-        next_delay = settings.bot.photo_showing_delay
+        next_delay = settings.bot.photo_show_delay + text_reading_time(caption)
     await state.update_data({'next_delay': next_delay})
 
     return await message.answer_photo(
         types.FSInputFile(MEDIA_DIR / photo_path),
+        caption,
         **kwargs
     )
 
@@ -119,13 +121,15 @@ async def delete_inline_keyboard(
 
 
 def text_reading_time(
-        text: str,
-        words_per_minute: int = settings.bot.words_per_minute
+        text: str | None,
+        words_per_minute: int = settings.bot.reading_speed
 ) -> int:
     """
     Функция возвращает время в секундах, необходимое для прочтения текста text
     человеком со скоростью words_per_minute (слов в минуту). Минимальное время
     чтения текста любого размера - 1 секунда"""
+    if text is None:
+        return 0
     return max(1, int(len(text.split()) / words_per_minute * 60))
 
 

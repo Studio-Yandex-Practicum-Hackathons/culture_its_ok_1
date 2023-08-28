@@ -12,7 +12,7 @@ IN_DOCKER: bool = os.getenv('AM_I_IN_A_DOCKER_CONTAINER', False) == 'YES'
 BASE_DIR: pathlib.Path = Path(__file__).parent.parent
 LOG_DIR: pathlib.Path = BASE_DIR / 'logs'
 MEDIA_DIR: pathlib.Path = BASE_DIR / 'media'
-PRIVATE_DIR: pathlib.Path = BASE_DIR / 'private'
+VOICE_DIR: pathlib.Path = MEDIA_DIR / 'voice'
 
 
 class EnvBase(BaseSettings):
@@ -22,12 +22,19 @@ class EnvBase(BaseSettings):
 
 
 class BotSettings(EnvBase):
+    def __init__(self):
+        os.makedirs(LOG_DIR, exist_ok=True)
+        os.makedirs(MEDIA_DIR, exist_ok=True)
+        os.makedirs(VOICE_DIR, exist_ok=True)
+        super().__init__()
+
     telegram_token: str
     debug: bool
     admin_password: SecretStr
-    words_per_minute: int
-    photo_showing_delay: int
-    reflection_length_limit: int
+    reading_speed: int
+    photo_show_delay: int
+    reflection_text_limit: int
+    reflection_voice_limit: int
 
 
 class PostgresSettings(EnvBase):
@@ -46,10 +53,6 @@ class SentrySettings(EnvBase):
 
 
 class LoggingSettings(EnvBase):
-    def __init__(self):
-        os.makedirs(LOG_DIR, exist_ok=True)
-        super().__init__()
-
     log_file: pathlib.Path = LOG_DIR / 'bot.log'
     log_format: str = '"%(asctime)s - [%(levelname)s] - %(message)s"'
     dt_format: str = '%d.%m.%Y %H:%M:%S'

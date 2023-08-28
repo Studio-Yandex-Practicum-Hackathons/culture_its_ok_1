@@ -4,5 +4,4 @@ venv
 .venv
 media
 static
-private
 .env
