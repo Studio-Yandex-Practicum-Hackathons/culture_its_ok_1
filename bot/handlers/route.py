@@ -1,7 +1,7 @@
 import re
-from uuid import uuid4
 from datetime import datetime
 from random import choice
+from uuid import uuid4
 
 from aiogram import F, Router, types
 from aiogram.filters.command import Command
