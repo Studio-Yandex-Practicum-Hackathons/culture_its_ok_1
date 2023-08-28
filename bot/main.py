@@ -5,6 +5,7 @@ from core.config import settings
 from core.logger import log_dec, logger_factory
 from core.middleware import SessionMiddleware
 from handlers import admin_router, new_user_router, route_router, start_router
+from aiogram.fsm.middleware import FSMContextMiddleware
 
 
 @log_dec(logger=logger_factory(__name__))
@@ -14,6 +15,8 @@ async def main():
     dispatcher = Dispatcher()
     dispatcher.message.middleware(SessionMiddleware())
     dispatcher.callback_query.middleware(SessionMiddleware())
+    dispatcher.poll.middleware(SessionMiddleware())
+    dispatcher.poll.middleware(dispatcher.fsm.storage)
     dispatcher.include_routers(
         start_router,
         new_user_router,

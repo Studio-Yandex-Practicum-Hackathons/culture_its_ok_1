@@ -4,6 +4,7 @@ from asyncio import sleep
 from aiogram import types
 from aiogram.fsm import context
 from core.config import MEDIA_DIR, settings
+from core.exceptions import LogicalError
 
 EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 CHAT_ACTION_PERIOD = 5
@@ -91,6 +92,22 @@ async def answer_photo_with_delay(
     )
 
 
+async def answer_poll_with_delay(
+    message: types.Message,
+    state: context.FSMContext,
+    **kwargs
+):
+    """Функция отправляет квиз с предварительной задержкой, равной времени
+    прочтения текста/просмотра фотографии пользователем, отправленных
+    в предыдущем сообщении. При этом, во время задержки пользователю
+    отправляется уведомление, что бот печатает."""
+    state_data = await state.get_data()
+    await delay_with_chat_action(message, state_data['next_delay'], 'typing')
+    await state.update_data({'next_delay': 1})
+
+    return await message.answer_poll(type='quiz', **kwargs)
+
+
 async def send_message_and_sleep(
     message: types.Message,
     text: str,
@@ -137,3 +154,34 @@ def check_is_email(email: str) -> bool:
     """Функция проверяет, является ли email валидным адресом электронной
     почты."""
     return bool(re.fullmatch(EMAIL_REGEX, email))
+
+
+def parse_quiz(content: str) -> dict:
+    question, *answers = content.split('\n')
+    options = []
+    correct_option_id = None
+
+    for i, answer in enumerate(answers):
+        if not answer.strip():
+            continue
+
+        if answer.startswith('*'):
+            if correct_option_id is not None:
+                msg = 'В квизе не может быть больше одного ответа'
+                raise LogicalError(msg)
+            correct_option_id = i
+            options.append(answer[1:].strip())
+        else:
+            options.append(answer.strip())
+
+    if len(options) < 2:
+        raise LogicalError('В квизе должно быть предложено хотя бы два ответа')
+
+    if correct_option_id is None:
+        raise LogicalError('В квизе не указан правильный ответ')
+
+    return {
+        'question': question,
+        'options': options,
+        'correct_option_id': correct_option_id
+    }

@@ -52,7 +52,8 @@ class Step(Base):
         ('text', 'Текст'),
         ('photo', 'Фото'),
         ('reflection', 'Рефлексия'),
-        ('continue_button', 'Кнопка продолжить'),
+        ('quiz', 'Квиз'),
+        ('continue_button', 'Кнопки'),
     ]
     _CHOICE_TO_TEXT = {_type: text for _type, text in _TYPE_CHOICES}
 

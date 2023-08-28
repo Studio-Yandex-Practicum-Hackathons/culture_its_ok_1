@@ -11,7 +11,8 @@ from core.exceptions import LogicalError
 from core.logger import log_dec, logger_factory
 from core.states import Route
 from core.utils import (answer_photo_with_delay, answer_with_delay,
-                        delete_inline_keyboard, delete_keyboard, reset_state)
+                        delete_inline_keyboard, delete_keyboard, reset_state,
+                        answer_poll_with_delay, parse_quiz)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
@@ -159,6 +160,7 @@ async def route_follow(
     while state_data['current_step'] < len(state_data['steps']):
         step = state_data['steps'][state_data['current_step']]
         state_data['current_step'] += 1
+        await state.update_data({'current_step': state_data['current_step']})
 
         # записали в БД текущий прогресс
         await progress_crud.update_by_attribute(
@@ -167,20 +169,20 @@ async def route_follow(
             session
         )
 
-        if step.type == 'text':
+        if step.type == 'text' and step.content:
             last_message = await answer_with_delay(
                 message, state, step.content, step.delay_after_display
             )
             continue
 
-        if step.type == 'photo':
+        if step.type == 'photo' and step.photo:
             last_message = await answer_photo_with_delay(
                 message, state, step.photo, step.content,
                 step.delay_after_display
             )
             continue
 
-        if step.type == 'continue_button':
+        if step.type == 'continue_button' and step.content:
             if last_message is None:
                 err_msg = 'Кнопке обязательно должно предшествовать сообщение'
                 raise LogicalError(err_msg)
@@ -191,10 +193,18 @@ async def route_follow(
             await state.set_state(Route.search)
             return
 
-        if step.type == 'reflection':
-            await answer_with_delay(message, state, step.content)
-            await state.update_data({**state_data, 'next_delay': 0})
+        if step.type == 'reflection' and step.content:
+            await answer_with_delay(message, state, step.content, 1)
             await state.set_state(Route.reflection)
+            return
+
+        if step.type == 'quiz' and step.content:
+            await answer_poll_with_delay(
+                message,
+                state,
+                **parse_quiz(step.content)
+            )
+            await state.set_state(Route.quiz)
             return
 
     # маршрут окончен, сохраняем прогресс и очищаем состояние
@@ -277,6 +287,18 @@ async def route_search(
             ),
             next_delay=0
         )
+
+
+@router.poll()
+@log_dec(logger)
+async def route_quiz(
+        message: types.Message,
+        state: context.FSMContext,
+        session: AsyncSession
+):
+    message.bot
+    print('aaaaaaaaaaaaaa')
+    # await route_follow(message, state, session)
 
 
 @router.message(Route.rate, F.text)
