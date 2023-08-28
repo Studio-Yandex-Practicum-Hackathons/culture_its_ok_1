@@ -85,7 +85,7 @@ class StageStep(Base):
 
 
 class User(Base):
-    id = Column(BigInteger, primary_key=True)
+    id = Column(BigInteger, primary_key=True)  # noqa: VNE003
     name = Column(String(255), nullable=False)
     age = Column(Integer, nullable=False)
     interests = Column(String(255))
