@@ -13,6 +13,7 @@ from core.states import Route
 from core.storage import storage
 from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
                         answer_with_delay, delete_inline_keyboard,
+                        delete_inline_keyboards,
                         delete_keyboard, parse_quiz, reset_state)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
@@ -92,7 +93,7 @@ async def route_selection(
             current_route.photo,
             current_route.description
         )
-        await answer_with_delay(
+        msg = await answer_with_delay(
             message,
             state,
             ROUTE_START_POINT.format(current_route.address),
@@ -100,6 +101,16 @@ async def route_selection(
                 text=START_MEDITATION,
                 callback_data=f'route${current_route.id}'
             )
+        )
+
+        #  сохраняем сообщение с inline клавиатурой в хранилище, чтобы
+        #  после выбора маршрута пользователем, удалить лишние клавиатуры
+        state_data = await state.get_data()
+        if not state_data.get('keyboards_to_delete'):
+            state_data['keyboards_to_delete'] = []
+        state_data['keyboards_to_delete'].append(msg.message_id)
+        await state.update_data(
+            {'keyboards_to_delete': state_data['keyboards_to_delete']}
         )
 
 
@@ -138,7 +149,6 @@ async def route_start(
         'steps': steps,
         'progress_id': progress_db.id
     })
-
     await state.set_state(Route.following)
     await route_follow(callback.message, state, session)
 

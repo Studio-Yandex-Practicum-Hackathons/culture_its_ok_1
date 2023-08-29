@@ -1,7 +1,7 @@
 import re
 from asyncio import sleep
 
-from aiogram import types
+from aiogram import types, methods
 from aiogram.fsm import context
 from core.config import MEDIA_DIR, settings
 from core.exceptions import LogicalError
@@ -135,6 +135,18 @@ async def delete_inline_keyboard(
 ):
     """Функция удаляет инлайн клавиатуру у полученного сообщения."""
     await message.edit_reply_markup(reply_markup=None)
+
+
+async def delete_inline_keyboards(
+        message_ids: list[int],
+):
+    """Функция удаляет инлайн клавиатуру у списка сообщений."""
+    for message_id in message_ids:
+        print('delete=', message_id)
+        # await methods.edit_message_reply_markup.EditMessageReplyMarkup(
+        #     chat_id=
+        # )
+        # await delete_inline_keyboard(message)
 
 
 def text_reading_time(
