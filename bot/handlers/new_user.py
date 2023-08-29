@@ -18,12 +18,14 @@ MAX_NAME_LENGTH = 30
 MIN_AGE = 3
 MAX_AGE = 125
 
+# ----------------------
 ACQUAINTANCE = 'Давайте познакомимся.'
 ENTER_NAME = 'Пожалуйста, введите ваше имя.'
 ENTER_REAL_NAME = 'Пожалуйста, введите ваше настоящее имя.'
 ENTER_AGE = 'Пожалуйста, введите ваш возраст.'
 ENTER_REAL_AGE = 'Пожалуйста, введите ваш настоящий возраст.'
 NICE_TO_MEET = '{}, приятно познакомиться!'
+# ----------------------
 
 
 @router.message(NewUser.name_input, F.text)
