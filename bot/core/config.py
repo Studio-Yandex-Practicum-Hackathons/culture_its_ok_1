@@ -1,12 +1,12 @@
 import logging
 import os
 import pathlib
+from datetime import timedelta
 from pathlib import Path
 
 import sentry_sdk
 from pydantic import Extra, Field, SecretStr
 from pydantic_settings import BaseSettings
-from datetime import timedelta
 
 IN_DOCKER: bool = os.getenv('AM_I_IN_A_DOCKER_CONTAINER', False) == 'YES'
 
