@@ -15,6 +15,7 @@ from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
                         answer_with_delay, delete_inline_keyboard,
                         delete_keyboard, parse_quiz, reset_state)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
+from handlers.spam import null_count
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
                               get_yes_no_inline_keyboard)
@@ -64,6 +65,7 @@ async def route_selection(
     """Обработчик выбора маршрута пользователем. Формирует клавиатуру с
     маршрутами. Выводит информацию о маршруте при нажатии на соответствующую
     кнопку."""
+    await null_count()
     db_routes = await route_crud.get_all_by_attribute(
         {'is_active': True}, session, sort='id asc'
     )
@@ -113,6 +115,7 @@ async def route_start(
     """Обработчик запуска прохождения маршрута. Принимает колбэк с id
     выбранного пользователем маршрута. Готовит цепочку шагов и запускает их
     прохождение."""
+    await null_count()
     await delete_keyboard(callback.message)
     await delete_inline_keyboard(callback.message)
     await callback.answer()
@@ -280,6 +283,7 @@ async def route_search(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    await null_count()
     await delete_inline_keyboard(callback.message)
     await callback.answer()
 
