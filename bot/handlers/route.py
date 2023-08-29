@@ -10,16 +10,16 @@ from core.config import VOICE_DIR, settings
 from core.exceptions import LogicalError
 from core.logger import log_dec, logger_factory
 from core.states import Route
-from core.utils import (answer_photo_with_delay, answer_with_delay,
-                        delete_inline_keyboard, delete_keyboard, reset_state,
-                        answer_poll_with_delay, parse_quiz)
+from core.storage import storage
+from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
+                        answer_with_delay, delete_inline_keyboard,
+                        delete_keyboard, parse_quiz, reset_state)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
                               get_yes_no_inline_keyboard)
 from keyboards.reply import get_reply_keyboard
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.quiz import QuizFilter, quiz_state, fsm_context
 
 router = Router()
 logger = logger_factory(__name__)
@@ -182,7 +182,7 @@ async def route_follow(
             )
             continue
 
-        if step['type'] == 'continue_button'  and step['content']:
+        if step['type'] == 'continue_button' and step['content']:
             if last_message is None:
                 err_msg = 'Кнопке обязательно должно предшествовать сообщение'
                 raise LogicalError(err_msg)
@@ -201,12 +201,10 @@ async def route_follow(
 
         if step['type'] == 'quiz' and step['content']:
             await answer_poll_with_delay(
-                message,
-                state,
-                **parse_quiz(step.content)
+                message, state, **parse_quiz(step['content'])
             )
-            quiz_state.set_state(True)
-            fsm_context.set_context(state)
+            # костыль используется для передачи message и state в route_quiz
+            storage.set_data(message, state)
             return
 
     # маршрут окончен, сохраняем прогресс и очищаем состояние
@@ -291,16 +289,15 @@ async def route_search(
         )
 
 
-@router.poll(QuizFilter)
+@router.poll()
 @log_dec(logger)
 async def route_quiz(
+        poll: types.Poll,
         message: types.Message,
+        state: context.FSMContext,
         session: AsyncSession
 ):
-    print(quiz_state.get_state())
-    quiz_state.set_state(False)
-    print(quiz_state.get_state())
-    await route_follow(message, fsm_context.get_context(), session)
+    await route_follow(message, state, session)
 
 
 @router.message(Route.rate, F.text)

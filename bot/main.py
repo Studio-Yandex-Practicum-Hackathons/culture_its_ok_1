@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage
 from core.config import settings
 from core.logger import log_dec, logger_factory
-from core.middleware import SessionMiddleware
+from core.middleware import SessionMiddleware, StateMessageMiddleware
 from handlers import admin_router, new_user_router, route_router, start_router
 from redis.asyncio import Redis
 
@@ -23,6 +23,7 @@ async def main():
     dispatcher.message.middleware(SessionMiddleware())
     dispatcher.callback_query.middleware(SessionMiddleware())
     dispatcher.poll.middleware(SessionMiddleware())
+    dispatcher.poll.middleware(StateMessageMiddleware())
     dispatcher.include_routers(
         start_router,
         new_user_router,

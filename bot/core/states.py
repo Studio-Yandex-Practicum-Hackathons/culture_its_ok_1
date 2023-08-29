@@ -11,7 +11,6 @@ class Route(state.StatesGroup):
     following = state.State()
     reflection = state.State()
     search = state.State()
-    quiz = state.State()
     rate = state.State()
 
 
