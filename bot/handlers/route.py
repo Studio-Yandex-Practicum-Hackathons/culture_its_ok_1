@@ -134,11 +134,12 @@ async def route_start(
 
     await state.update_data({
         'route_id': route_id,
-        'current_step': 0,
+        'current_step': -1,
         'steps': steps,
         'progress_id': progress_db.id
     })
 
+    await state.set_state(Route.following)
     await route_follow(callback.message, state, session)
 
 
@@ -148,19 +149,25 @@ async def route_follow(
         state: context.FSMContext,
         session: AsyncSession
 ):
-    """Функция проходит по цепочке шагов и отправляет пользователю сообщения"""
-    await state.set_state(Route.following)
-
+    """Функция проходит по цепочке шагов и отправляет пользователю сообщения,
+    фотографии, кнопки, квизы и рефлексию."""
     state_data = await state.get_data()
 
     # нужно хранить последнее отправленное сообщение, чтобы управлять им
     last_message = None
 
-    # TODO: сделать проверку, что пользователь не перезапустил маршрут
-    while state_data['current_step'] < len(state_data['steps']):
-        step = state_data['steps'][state_data['current_step']]
+    while True:
+        if state_data['current_step'] + 1 >= len(state_data['steps']):
+            # больше шагов нет, маршрут окончен
+            break
+
+        if await state.get_state() != Route.following:
+            # если пользователь перезапустил бота, покидаем маршрут
+            return
+
         state_data['current_step'] += 1
         await state.update_data({'current_step': state_data['current_step']})
+        step = state_data['steps'][state_data['current_step']]
 
         # записали в БД текущий прогресс
         await progress_crud.update_by_attribute(
@@ -207,8 +214,11 @@ async def route_follow(
             storage.set_data(message, state)
             return
 
-    # маршрут окончен, сохраняем прогресс и очищаем состояние
-    # TODO: сделать проверку, что пользователь не перезапустил маршрут
+    if await state.get_state() != Route.following:
+        # если пользователь перезапустил бота, покидаем маршрут
+        return
+
+    # маршрут окончен, сохраняем прогресс
     await progress_crud.update_by_attribute(
         {'id': state_data['progress_id']},
         {'finished_at': datetime.now()},
@@ -228,7 +238,7 @@ async def route_reflection(
         session: AsyncSession
 ):
     state_data = await state.get_data()
-    step = state_data['steps'][state_data['current_step'] - 1]
+    step = state_data['steps'][state_data['current_step']]
 
     if message.text:
         answer_type = 'text'
@@ -259,6 +269,7 @@ async def route_reflection(
         },
         session
     )
+    await state.set_state(Route.following)
     await route_follow(message, state, session)
 
 
@@ -273,10 +284,11 @@ async def route_search(
     await callback.answer()
 
     if callback.data == CALLBACK_YES:
+        await state.set_state(Route.following)
         await route_follow(callback.message, state, session)
     else:
         state_data = await state.get_data()
-        step = state_data['steps'][state_data['current_step'] - 1]
+        step = state_data['steps'][state_data['current_step']]
         stage = await stage_crud.get(step['stage_id'], session)
         await answer_with_delay(
             callback.message,
@@ -297,6 +309,7 @@ async def route_quiz(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    await state.set_state(Route.following)
     await route_follow(message, state, session)
 
 
