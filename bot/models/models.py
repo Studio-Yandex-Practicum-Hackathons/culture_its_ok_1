@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from db.postgres import Base
-from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
-                        Text)
+from sqlalchemy import (BigInteger, Boolean, Column, DateTime, ForeignKey,
+                        Integer, String, Text)
 from sqlalchemy.orm import relationship
 
 
@@ -68,6 +68,14 @@ class Step(Base):
         to_show += str(self.photo) if self.photo else f'{self.content[:25]}...'
         return f'Шаг ({to_show})'
 
+    def to_dict(self):
+        return dict(
+            type=self.type,
+            content=self.content,
+            photo=self.photo,
+            delay_after_display=self.delay_after_display
+        )
+
 
 class RouteStage(Base):
     route_id = Column(ForeignKey('culture_route.id'), primary_key=True)
@@ -86,6 +94,7 @@ class StageStep(Base):
 
 
 class User(Base):
+    id = Column(BigInteger, primary_key=True)  # noqa: VNE003
     name = Column(String(255), nullable=False)
     age = Column(Integer, nullable=False)
     interests = Column(String(255))

@@ -19,6 +19,7 @@ from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_yes_no_inline_keyboard)
 from keyboards.reply import get_reply_keyboard
 from sqlalchemy.ext.asyncio import AsyncSession
+from core.quiz import QuizFilter, quiz_state, fsm_context
 
 router = Router()
 logger = logger_factory(__name__)
@@ -122,13 +123,12 @@ async def route_start(
     steps = []
     for stage in route.stages:
         for step in stage.steps:
-            step.stage_id = stage.id
-            steps.append(step)
+            steps.append({**step.to_dict(), 'stage_id': stage.id})
 
     progress = dict(
         user_id=callback.from_user.id,
         route_id=route_id,
-        stage_id=steps[0].stage_id,
+        stage_id=steps[0]['stage_id'],
     )
     progress_db = await progress_crud.create(progress, session)
 
@@ -165,46 +165,48 @@ async def route_follow(
         # записали в БД текущий прогресс
         await progress_crud.update_by_attribute(
             {'id': state_data['progress_id']},
-            {'stage_id': step.stage_id},
+            {'stage_id': step['stage_id']},
             session
         )
 
-        if step.type == 'text' and step.content:
+        if step['type'] == 'text' and step['content']:
             last_message = await answer_with_delay(
-                message, state, step.content, step.delay_after_display
+                message, state, step['content'], step['delay_after_display']
             )
             continue
 
-        if step.type == 'photo' and step.photo:
+        if step['type'] == 'photo' and step['photo']:
             last_message = await answer_photo_with_delay(
-                message, state, step.photo, step.content,
-                step.delay_after_display
+                message, state, step['photo'], step['content'],
+                step['delay_after_display']
             )
             continue
 
-        if step.type == 'continue_button' and step.content:
+        if step['type'] == 'continue_button'  and step['content']:
             if last_message is None:
                 err_msg = 'Кнопке обязательно должно предшествовать сообщение'
                 raise LogicalError(err_msg)
 
-            keyboard = get_yes_no_inline_keyboard(*step.content.split('\n'))
+            keyboard = get_yes_no_inline_keyboard(*step['content'].split('\n'))
             await last_message.edit_reply_markup(reply_markup=keyboard)
             await state.update_data({**state_data, 'next_delay': 0})
             await state.set_state(Route.search)
             return
 
-        if step.type == 'reflection' and step.content:
-            await answer_with_delay(message, state, step.content, 1)
+        if step['type'] == 'reflection' and step['content']:
+            await answer_with_delay(message, state, step['content'])
+            await state.update_data({**state_data, 'next_delay': 0})
             await state.set_state(Route.reflection)
             return
 
-        if step.type == 'quiz' and step.content:
+        if step['type'] == 'quiz' and step['content']:
             await answer_poll_with_delay(
                 message,
                 state,
                 **parse_quiz(step.content)
             )
-            await state.set_state(Route.quiz)
+            quiz_state.set_state(True)
+            fsm_context.set_context(state)
             return
 
     # маршрут окончен, сохраняем прогресс и очищаем состояние
@@ -245,7 +247,7 @@ async def route_reflection(
         answer_content = filename
 
     route = await route_crud.get(state_data['route_id'], session)
-    stage = await stage_crud.get(step.stage_id, session)
+    stage = await stage_crud.get(step['stage_id'], session)
 
     # TODO: распознать текст и записать в БД
     await reflection_crud.create(
@@ -253,7 +255,7 @@ async def route_reflection(
             'user_id': message.from_user.id,
             'route_name': route.name,
             'stage_name': stage.name,
-            'question': step.content,
+            'question': step['content'],
             'answer_type': answer_type,
             'answer_content': answer_content
         },
@@ -277,7 +279,7 @@ async def route_search(
     else:
         state_data = await state.get_data()
         step = state_data['steps'][state_data['current_step'] - 1]
-        stage = await stage_crud.get(step.stage_id, session)
+        stage = await stage_crud.get(step['stage_id'], session)
         await answer_with_delay(
             callback.message,
             state,
@@ -289,16 +291,16 @@ async def route_search(
         )
 
 
-@router.poll()
+@router.poll(QuizFilter)
 @log_dec(logger)
 async def route_quiz(
         message: types.Message,
-        state: context.FSMContext,
         session: AsyncSession
 ):
-    message.bot
-    print('aaaaaaaaaaaaaa')
-    # await route_follow(message, state, session)
+    print(quiz_state.get_state())
+    quiz_state.set_state(False)
+    print(quiz_state.get_state())
+    await route_follow(message, fsm_context.get_context(), session)
 
 
 @router.message(Route.rate, F.text)
