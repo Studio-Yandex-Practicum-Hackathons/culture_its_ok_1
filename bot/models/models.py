@@ -67,6 +67,14 @@ class Step(Base):
         to_show += str(self.photo) if self.photo else f'{self.content[:25]}...'
         return f'Шаг ({to_show})'
 
+    def to_dict(self):
+        return dict(
+            type=self.type,
+            content=self.content,
+            photo=self.photo,
+            delay_after_display=self.delay_after_display
+        )
+
 
 class RouteStage(Base):
     route_id = Column(ForeignKey('culture_route.id'), primary_key=True)
