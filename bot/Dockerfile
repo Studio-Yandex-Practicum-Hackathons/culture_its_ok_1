@@ -10,6 +10,7 @@ COPY . .
 
 RUN apt-get update && \
     apt-get install -y netcat-traditional && \
+    apt-get install -y ffmpeg && \
     pip install --upgrade pip && \
     pip install --no-cache-dir poetry==1.4.2 && \
     poetry config virtualenvs.create false && \

@@ -13,7 +13,7 @@ from core.states import Route
 from core.storage import storage
 from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
                         answer_with_delay, delete_inline_keyboard,
-                        delete_keyboard, parse_quiz, reset_state)
+                        delete_keyboard, parse_quiz, reset_state, trim_audio)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
@@ -244,13 +244,11 @@ async def route_reflection(
         answer_type = 'text'
         answer_content = message.text[:settings.bot.reflection_text_limit]
     else:
-        # TODO: обрезать аудиофайл до предельной длительности
         filename = (f'{uuid4()}+'
                     f'{datetime.now().strftime("%d.%m.%Y_%H-%M-%S")}.mp3')
-        await message.bot.download(
-            message.voice,
-            destination=VOICE_DIR / filename
-        )
+        filepath = VOICE_DIR / filename
+        await message.bot.download(message.voice, destination=filepath)
+        trim_audio(str(filepath), settings.bot.reflection_voice_limit)
         answer_type = 'voice'
         answer_content = filename
 
