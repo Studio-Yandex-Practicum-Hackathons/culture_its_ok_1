@@ -141,28 +141,14 @@ def check_is_email(email: str) -> bool:
     return bool(re.fullmatch(EMAIL_REGEX, email))
 
 
-def trim_audio(input_path, output_path, target_duration):
-    # Загрузка аудиофайла
-    audio = AudioSegment.from_mp3(input_path)
-
-    # Определение длительности аудиофайла в миллисекундах
+def trim_audio(voice_path: str, target_duration: int) -> None:
+    """Функция обрезает mp3 файл голосового сообщения до заданной длины."""
+    audio = AudioSegment.from_mp3(voice_path)
     audio_duration = len(audio)
-
-    # Определение длительности обрезанного аудио в миллисекундах
     target_duration_ms = target_duration * 1000
 
     if audio_duration <= target_duration_ms:
-        # Если аудио уже короче или равно желаемой длительности,
-        # сохраняем его как есть
-        audio.export(output_path, format="mp3")
+        audio.export(voice_path, format="mp3")
     else:
-        # Обрезаем аудио до заданной длительности
         trimmed_audio = audio[:target_duration_ms]
-        trimmed_audio.export(output_path, format="mp3")
-
-# Пример использования функции
-input_audio_path = "input_audio.mp3"  # Путь к исходному аудиофайлу
-output_audio_path = "output_audio.mp3"  # Путь для сохранения обрезанного аудиофайла
-target_duration = 30  # Желаемая длительность аудио в секундах
-
-# trim_audio(input_audio_path, output_audio_path, target_duration)
+        trimmed_audio.export(voice_path, format="mp3")
