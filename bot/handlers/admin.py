@@ -191,8 +191,8 @@ async def period_selection(
         return
 
     await state.update_data({
-        'start': start,
-        'end': end
+        'start': start.strftime('%d.%m.%Y'),
+        'end': end.strftime('%d.%m.%Y')
     })
     await message.answer(ENTER_EMAIL)
     await state.set_state(Admin.email_input)
