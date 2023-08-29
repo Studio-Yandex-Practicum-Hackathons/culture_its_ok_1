@@ -11,8 +11,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = Router()
 logger = logger_factory(__name__)
 
+# ----------------------
 WELCOME = 'Добро пожаловать!'
+BOT_INFO = ('Бот проведёт для вас экскурсию-медитацию по маршрутам с работами '
+            'современных уличных художников.')
 GREETING = 'С возвращением, {}!'
+# ----------------------
 
 
 @router.message(CommandStart())
@@ -22,6 +26,15 @@ async def cmd_start(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    # from keyboards.inline import get_one_button_inline_keyboard
+    # await message.answer_poll(
+    #     question='Интересы?',
+    #     options=['1','2','3'],
+    #     allows_multiple_answers=True,
+    #     allow_sending_without_reply=True
+    # )
+    #
+    # return
     await reset_state(state, next_delay=0)
     # TODO: удалять накопленные inline-клавиатуры
 
@@ -30,8 +43,9 @@ async def cmd_start(
 
     user = await user_crud.get(message.from_user.id, session)
     if user and message.from_user.id == user.id:
-        await answer_with_delay(message, state, GREETING.format(user.name), 2)
+        await answer_with_delay(message, state, GREETING.format(user.name))
         await route_selection(message, state, session)
         return
 
+    await answer_with_delay(message, state, BOT_INFO, 2)
     await name_input(message, state, session)
