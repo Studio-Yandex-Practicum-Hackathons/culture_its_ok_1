@@ -16,6 +16,18 @@ services:
       - ./env/.general
       - ./env/.postgres
 
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: culture-redis
+    hostname: ${REDIS_HOST}
+    restart: on-failure
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    expose:
+      - ${REDIS_PORT}
+    volumes:
+      - culture_redis_data:/data
+
   nginx:
     image: nginx:${NGINX_VERSION}
     container_name: culture-nginx
@@ -62,7 +74,6 @@ services:
 #    entrypoint: /app/docker-entrypoint.sh
 #    volumes:
 #      - culture_media_data:/app/media/
-#      - culture_private_data:/app/private/
 #    env_file:
 #      - ./env/.general
 #      - ./env/.bot
@@ -72,6 +83,6 @@ services:
 
 volumes:
   culture_postgresql_data:
+  culture_redis_data:
   culture_static_data:
   culture_media_data:
-  culture_private_data:

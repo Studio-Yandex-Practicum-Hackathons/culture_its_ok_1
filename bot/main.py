@@ -5,13 +5,21 @@ from core.config import settings
 from core.logger import log_dec, logger_factory
 from core.middleware import SessionMiddleware
 from handlers import admin_router, new_user_router, route_router, start_router
+from redis.asyncio import Redis
+from aiogram.fsm.storage.redis import RedisStorage
 
 
 @log_dec(logger=logger_factory(__name__))
 async def main():
     bot = Bot(token=settings.bot.telegram_token, parse_mode='html')
 
-    dispatcher = Dispatcher()
+    dispatcher = Dispatcher(
+        storage=RedisStorage(
+            Redis(host=settings.redis.host, port=settings.redis.port),
+            state_ttl=settings.bot.storage_ttl,
+            data_ttl=settings.bot.storage_ttl
+        )
+    )
     dispatcher.message.middleware(SessionMiddleware())
     dispatcher.callback_query.middleware(SessionMiddleware())
     dispatcher.include_routers(
