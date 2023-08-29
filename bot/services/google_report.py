@@ -3,6 +3,8 @@ from aiogoogle.auth.creds import ServiceAccountCreds
 from aiogoogle.resource import GoogleAPI
 from core.config import settings
 from pydantic import EmailStr
+from db.crud import CRUDProgress
+from datetime import timedelta
 
 
 async def get_google_service(credentials: ServiceAccountCreds):
@@ -137,3 +139,48 @@ class GoogleReport:
             msg = ('Установите email, которому будет предоставлен доступ к '
                    'отчёту')
             raise ValueError(msg)
+
+
+class Report_generator:
+    NEEDED_KEYS = [
+        "route_id",
+        "report_id",
+        "start",
+        "end",
+        "email",
+    ]
+
+    def create_report(self, data):
+        for key in self.NEEDED_KEYS:
+            if key not in data:
+                return None
+        if data["report_id"] == 1:
+            self.progress(data)
+
+    def progress(self, data):
+        list = CRUDProgress().get_date_range(
+            id=1,
+            start=data["start"],
+            end=data["end"],
+        )
+        times_used = f"Пользователи воспользовались маршрутом {len(list)} раз"
+        times_finished = 0
+        time_spent = []
+        for treck in list:
+            if not treck.finished_at:
+                times_finished += 1
+                time_spent.append(treck.finished_at - treck.started_at)
+        times_finished = f"Пользователи завершили маршрут {times_finished} раз"
+        max_time_spent = f"Максимальное время на маршруте: {max(time_spent)}"
+        min_time_spent = f"Минимальное время на маршруте: {min(time_spent)}"
+        avg_time_spent = (
+            "Среднее время на маршруте: "
+            f"{sum(time_spent, timedelta(0)) / len(time_spent)}"
+        )
+        return [
+            times_used,
+            max_time_spent,
+            min_time_spent,
+            avg_time_spent,
+            times_finished,
+        ]
