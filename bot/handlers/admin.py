@@ -7,7 +7,7 @@ from core.config import settings
 from core.logger import log_dec, logger_factory
 from core.states import Admin
 from core.utils import (check_is_email, delete_inline_keyboard,
-                        send_message_and_sleep, delete_keyboard)
+                        delete_keyboard, send_message_and_sleep)
 from db.crud import route_crud
 from keyboards.inline import get_inline_keyboard
 from sqlalchemy.ext.asyncio import AsyncSession
