@@ -1,5 +1,6 @@
 import re
 from asyncio import sleep
+from datetime import datetime
 
 from aiogram import types
 from aiogram.fsm import context
@@ -195,3 +196,12 @@ def trim_audio(file_path: str, target_duration_s: int) -> None:
     target_duration_ms = target_duration_s * 1000
     if audio_duration_ms > target_duration_ms:
         audio[:target_duration_ms].export(file_path, format="mp3")
+
+
+def date_str_to_datetime(date: str, delimiter: str = '.'):
+    """Преобразовывает дату в формате ДД.ММ.ГГГГ в datetime."""
+    return datetime(*reversed(list(map(int, date.split(delimiter)))))
+
+
+def calc_avg(values: list[int], n_digits: int) -> float:
+    return round(sum(values) / len(values), n_digits)
