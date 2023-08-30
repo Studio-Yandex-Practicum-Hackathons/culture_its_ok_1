@@ -175,7 +175,7 @@ class User(models.Model):
     age = models.IntegerField(
         verbose_name='Возраст'
     )
-    interests = models.CharField(
+    hobbies = models.CharField(
         max_length=255,
         blank=True,
         null=True,
