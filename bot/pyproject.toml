@@ -19,6 +19,8 @@ redis = "^5.0.0"
 pydub = "^0.25.1"
 vosk = "^0.3.45"
 ffmpeg = "^1.4"
+pysoundfile = "^0.9.0.post1"
+numpy = "^1.25.2"
 
 [build-system]
 requires = ["poetry-core"]
