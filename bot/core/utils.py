@@ -137,6 +137,15 @@ async def delete_inline_keyboard(
     await message.edit_reply_markup(reply_markup=None)
 
 
+async def delete_inline_keyboard_after_delay(
+        message: types.Message,
+        delay: int,
+):
+    """Функция удаляет инлайн клавиатуру у полученного сообщения."""
+    await sleep(delay)
+    await message.edit_reply_markup(reply_markup=None)
+
+
 def text_reading_time(
         text: str | None,
         words_per_minute: int = settings.bot.reading_speed

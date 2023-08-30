@@ -37,3 +37,14 @@ def get_yes_no_inline_keyboard(
             InlineKeyboardButton(text=no_text, callback_data=CALLBACK_NO)
         )
     return builder.as_markup()
+
+
+def get_web_app_keyboard(
+        text: str,
+        web_app_info: str
+):
+    builder = InlineKeyboardBuilder()
+    builder.add(
+        InlineKeyboardButton(text=text, web_app=web_app_info)
+    )
+    return builder.as_markup()
