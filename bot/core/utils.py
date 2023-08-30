@@ -6,7 +6,6 @@ from aiogram.fsm import context
 from core.config import MEDIA_DIR, settings
 from core.exceptions import LogicalError
 import json
-import os
 from pydub import AudioSegment
 from vosk import Model, KaldiRecognizer
 
@@ -200,8 +199,9 @@ def trim_audio(file_path: str, target_duration_s: int) -> None:
         audio[:target_duration_ms].export(file_path, format="mp3")
 
 def speech_to_text(media):
+    """Функция принимает путь к медиафайлу и возвращает текст."""
     FRAME_RATE = 16000
-    CHANNELS=1
+    CHANNELS = 1
     model = Model(r"vosk")
     rec = KaldiRecognizer(model, FRAME_RATE)
     rec.SetWords(True)
