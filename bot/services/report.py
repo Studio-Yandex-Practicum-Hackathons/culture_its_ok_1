@@ -33,7 +33,7 @@ async def make_users_report(
     for user in users:
         used_amount = await progress_crud.get_user_usage(user.id, session)
         rows.extend([
-             [user.name, user.age, user.interests, used_amount]
+             [user.name, user.age, user.hobbies, used_amount]
         ])
 
     report = GoogleReport()
