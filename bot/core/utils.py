@@ -202,7 +202,7 @@ def speech_to_text(media):
     """Функция принимает путь к медиафайлу и возвращает текст."""
     FRAME_RATE = 16000
     CHANNELS = 1
-    model = Model(r"vosk")
+    model = Model(r"core/vosk")
     rec = KaldiRecognizer(model, FRAME_RATE)
     rec.SetWords(True)
     # Используя библиотеку pydub делаем предобработку аудио
