@@ -3,13 +3,13 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.redis import RedisStorage
 from core.config import settings
-from core.logger import log_dec, logger_factory
+from core.logger import log_exceptions, logger_factory
 from core.middleware import SessionMiddleware, StateMessageMiddleware
-from handlers import admin_router, new_user_router, route_router, start_router
+from handlers import admin_router, new_user_router, route_router, start_router, spam_router
 from redis.asyncio import Redis
 
 
-@log_dec(logger=logger_factory(__name__))
+@log_exceptions(logger=logger_factory(__name__))
 async def main():
     bot = Bot(token=settings.bot.telegram_token, parse_mode='html')
 
@@ -29,6 +29,7 @@ async def main():
         new_user_router,
         route_router,
         admin_router,
+        spam_router
     )
 
     await bot.delete_webhook(drop_pending_updates=True)
