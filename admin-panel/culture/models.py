@@ -214,37 +214,36 @@ class Progress(models.Model):
 
 
 class Reflection(models.Model):
-    TYPE_CHOICES = [
-        ('text', 'Текст'),
-        ('voice', 'Голос'),
-    ]
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь'
     )
-    route_name = models.CharField(
-        max_length=255,
-        verbose_name='Название маршрута'
+    route = models.ForeignKey(
+        Route,
+        on_delete=models.CASCADE,
+        verbose_name='Маршрут'
     )
-    stage_name = models.CharField(
-        max_length=255,
-        verbose_name='Название этапа'
+    stage = models.ForeignKey(
+        Stage,
+        on_delete=models.CASCADE,
+        verbose_name='Этап'
     )
-    created = models.DateTimeField(
+    created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания рефлексии'
     )
-    question = models.CharField(
-        max_length=255,
+    question = models.TextField(
         verbose_name='Вопрос для рефлексии'
     )
-    answer_type = models.CharField(
-        max_length=10,
-        choices=TYPE_CHOICES,
-        verbose_name='Тип ответа'
+    answer = models.TextField(
+        verbose_name='Текстовое содержимое рефлексии',
+        blank=True,
+        null=True,
     )
-    answer_content = models.TextField(
-        verbose_name='Содержимое ответа'
+    voice = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Аудиофайл рефлексии'
     )
