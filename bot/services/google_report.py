@@ -126,6 +126,8 @@ class GoogleReport:
 
     @staticmethod
     def _max_width(table: list) -> int:
+        if not table:
+            return 0
         return len(max(table, key=lambda x: len(x)))
 
     def _validate_fields(self):
