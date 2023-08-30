@@ -207,8 +207,8 @@ def speech_to_text(media):
     rec.SetWords(True)
     # Используя библиотеку pydub делаем предобработку аудио
     ogg = AudioSegment.from_ogg(media)
-    ogg = ogg[: 10000]
     # Можно ограничить время аудио в примере первые 10 сек
+    ogg = ogg[:10000]
     ogg = ogg.set_channels(CHANNELS)
     ogg = ogg.set_frame_rate(FRAME_RATE)
     # Преобразуем вывод в json
