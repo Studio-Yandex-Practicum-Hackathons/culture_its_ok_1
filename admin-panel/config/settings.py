@@ -116,7 +116,14 @@ TINYMCE_DEFAULT_CONFIG = {
     'toolbar': 'undo redo | styleselect | bold italic ',
     'toolbar_items_size': 'medium',
     'valid_elements': (
-        'b, strong, i, em, u, ins, s, strike, del, span[class|tg-spoiler], '
-        'tg-spoiler, a[href], code, pre'
+        'b,strong,i,em,u,ins,s,strike,del,'
+        'span[class|tg-spoiler],a[href],code,pre'
     ),
+    'valid_children': '+a[span],+span[a|b|strong|i|em|u|ins|s|'
+                      'strike|del|code|pre],+a[href|b|strong|i|em|u|'
+                      'ins|s|strike|del|code|pre],+span[class|tg-spoiler]',
+    'extended_valid_elements': (
+        'a[href|target|data-id|class],span[class|tg-spoiler]'
+    ),
+    'forced_root_block': False
 }

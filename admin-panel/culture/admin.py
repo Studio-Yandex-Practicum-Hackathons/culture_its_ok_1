@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
+from django.db import models
+from tinymce.widgets import TinyMCE
 
 from .models import Route, RouteStage, Stage, StageStep, Step
 
@@ -20,7 +22,10 @@ class StageStepInline(admin.TabularInline):
 
 @admin.register(Route)
 class RouteAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address', 'is_active')
+    formfield_overrides = {
+        models.TextField: {'widget': TinyMCE()},
+    }
+    list_display = ('name', 'address', 'is_active', 'description')
     list_filter = ('is_active',)
     search_fields = ('name', 'address')
     inlines = [RouteStageInline]
@@ -28,6 +33,9 @@ class RouteAdmin(admin.ModelAdmin):
 
 @admin.register(Stage)
 class StageAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        models.TextField: {'widget': TinyMCE()},
+    }
     list_display = ('name', 'address')
     search_fields = ('name', 'address')
     inlines = [StageStepInline]
@@ -35,6 +43,9 @@ class StageAdmin(admin.ModelAdmin):
 
 @admin.register(Step)
 class StepAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        models.TextField: {'widget': TinyMCE()},
+    }
     list_display = ('type', 'content', 'photo', 'delay_after_display')
     list_filter = ('type',)
     search_fields = ('content',)
