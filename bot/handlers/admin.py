@@ -5,7 +5,7 @@ from aiogram import F, Router, types
 from aiogram.filters.command import Command, CommandObject
 from aiogram.fsm import context
 from core.config import settings
-from core.logger import log_dec, logger_factory
+from core.logger import log_exceptions, logger_factory
 from core.states import Admin
 from core.utils import (check_is_email, date_str_to_datetime,
                         delete_inline_keyboard, delete_keyboard,
@@ -46,11 +46,10 @@ REPORT_READY = 'Отчёт сформирован. Для доступа к не
 
 
 @router.message(Command('admin'))
-@log_dec(logger)
+@log_exceptions(logger)
 async def cmd_admin(
         message: types.Message,
         state: context.FSMContext,
-        session: AsyncSession,
         command: CommandObject
 ):
     await state.clear()
@@ -77,7 +76,7 @@ async def cmd_admin(
 
 
 @router.message(Command('exit'))
-@log_dec(logger)
+@log_exceptions(logger)
 async def cmd_exit(
         message: types.Message,
         state: context.FSMContext
@@ -87,7 +86,7 @@ async def cmd_exit(
                          reply_markup=types.ReplyKeyboardRemove())
 
 
-@log_dec(logger)
+@log_exceptions(logger)
 async def admin_welcome(
         message: types.Message,
         state: context.FSMContext,
@@ -104,7 +103,7 @@ async def admin_welcome(
 
 
 @router.callback_query(Admin.report_selection, F.data.startswith('report$'))
-@log_dec(logger)
+@log_exceptions(logger)
 async def report_selection(
         callback: types.CallbackQuery,
         state: context.FSMContext,
@@ -125,7 +124,7 @@ async def report_selection(
 
 
 @router.callback_query(Admin.route_selection, F.data.startswith('rpt_route$'))
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_selection(
         callback: types.CallbackQuery,
         state: context.FSMContext,
@@ -157,7 +156,7 @@ async def route_selection(
 
 
 @router.message(Admin.period_selection, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def period_selection(
         message: types.Message,
         state: context.FSMContext,
@@ -192,7 +191,7 @@ async def period_selection(
 
 
 @router.message(Admin.email_input, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def email_input(
         message: types.Message,
         state: context.FSMContext,

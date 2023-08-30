@@ -2,12 +2,13 @@ import re
 
 from aiogram import F, Router, types
 from aiogram.fsm import context
-from core.logger import log_dec, logger_factory
+from core.logger import log_exceptions, logger_factory
 from core.states import NewUser
 from core.utils import answer_with_delay, reset_state
 from db.crud import user_crud
 from handlers.route import route_selection
 from sqlalchemy.ext.asyncio import AsyncSession
+from handlers.spam import spam_counter
 
 router = Router()
 logger = logger_factory(__name__)
@@ -31,12 +32,13 @@ NICE_TO_MEET = '{}, приятно познакомиться!'
 
 
 @router.message(NewUser.name_input, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def name_input(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if await state.get_state() != NewUser.name_input:
         await answer_with_delay(message, state, ACQUAINTANCE)
         await answer_with_delay(message, state, ENTER_NAME)
@@ -53,12 +55,13 @@ async def name_input(
 
 
 @router.message(NewUser.age_input, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def age_input(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if await state.get_state() != NewUser.age_input:
         await answer_with_delay(message, state, ENTER_AGE)
         await state.set_state(NewUser.age_input)
@@ -76,12 +79,13 @@ async def age_input(
 
 
 @router.message(NewUser.hobby_input, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def hobby_input(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if await state.get_state() != NewUser.hobby_input:
         await answer_with_delay(message, state, ENTER_HOBBIES)
         await state.set_state(NewUser.hobby_input)

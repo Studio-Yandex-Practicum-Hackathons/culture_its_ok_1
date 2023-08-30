@@ -9,7 +9,7 @@ from aiogram.fsm import context
 from aiogram.types.web_app_info import WebAppInfo
 from core.config import VOICE_DIR, settings
 from core.exceptions import LogicalError
-from core.logger import log_dec, logger_factory
+from core.logger import log_exceptions, logger_factory
 from core.states import Route
 from core.storage import storage
 from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
@@ -22,6 +22,7 @@ from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_web_app_keyboard, get_yes_no_inline_keyboard)
 from keyboards.reply import get_reply_keyboard
 from sqlalchemy.ext.asyncio import AsyncSession
+from handlers.spam import spam_counter, INSTRUCTION
 
 router = Router()
 logger = logger_factory(__name__)
@@ -62,7 +63,7 @@ WEB_APP_BUTTON_URL = 'https://9722ba.creatium.site/'
 
 
 @router.message(Route.selection, F.text, ~Command(re.compile(r'^.+$')))
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_selection(
         message: types.Message,
         state: context.FSMContext,
@@ -91,6 +92,7 @@ async def route_selection(
         return
 
     if message.text in routes:
+        spam_counter.reset()
         current_route = routes[message.text]
 
         await answer_photo_with_delay(
@@ -108,10 +110,16 @@ async def route_selection(
                 callback_data=f'route${current_route.id}'
             )
         )
+        return
+
+    # пользователь вводит произвольный текст, вместо выбора маршрута
+    spam_counter.increase()
+    if spam_counter.is_exceeded():
+        await message.answer(INSTRUCTION)
 
 
 @router.callback_query(Route.selection, F.data.startswith('route$'))
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_start(
         callback: types.CallbackQuery,
         state: context.FSMContext,
@@ -120,6 +128,7 @@ async def route_start(
     """Обработчик запуска прохождения маршрута. Принимает колбэк с id
     выбранного пользователем маршрута. Готовит цепочку шагов и запускает их
     прохождение."""
+    spam_counter.reset()
     await delete_keyboard(callback.message)
     await delete_inline_keyboard(callback.message)
     await callback.answer()
@@ -152,7 +161,7 @@ async def route_start(
     await route_follow(callback.message, state, session)
 
 
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_follow(
         message: types.Message,
         state: context.FSMContext,
@@ -166,6 +175,8 @@ async def route_follow(
     last_message = None
 
     while True:
+        spam_counter.reset()
+
         if state_data['current_step'] + 1 >= len(state_data['steps']):
             # больше шагов нет, маршрут окончен
             break
@@ -240,12 +251,13 @@ async def route_follow(
 
 
 @router.message(Route.reflection, F.text | F.voice)
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_reflection(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if message.text:
         answer = message.text[:settings.bot.reflection_text_limit]
         voice = None
@@ -277,12 +289,13 @@ async def route_reflection(
 
 
 @router.callback_query(Route.search, F.data.in_({CALLBACK_YES, CALLBACK_NO}))
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_search(
         callback: types.CallbackQuery,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     await delete_inline_keyboard(callback.message)
     await callback.answer()
 
@@ -305,24 +318,26 @@ async def route_search(
 
 
 @router.poll()
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_quiz(
         poll: types.Poll,
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     await state.set_state(Route.following)
     await route_follow(message, state, session)
 
 
 @router.message(Route.rate, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_rate(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if await state.get_state() != Route.rate:
         await state.set_state(Route.rate)
         await answer_with_delay(message, state, RATE_ROUTE)
