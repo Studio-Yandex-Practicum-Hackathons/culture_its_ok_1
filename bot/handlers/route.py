@@ -15,7 +15,7 @@ from core.storage import storage
 from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
                         answer_with_delay, delete_inline_keyboard,
                         delete_inline_keyboard_after_delay, delete_keyboard,
-                        parse_quiz, reset_state)
+                        parse_quiz, reset_state, trim_audio)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
@@ -52,10 +52,9 @@ WRONG_RATE = f'Пожалуйста, введите число от {MIN_RATE} �
 HIGH_RATE = 'Спасибо за столь высокую оценку нашей работы!'
 MEDIUM_RATE = 'Спасибо за вашу оценку. Мы будем стараться быть лучше!'
 LOW_RATE = 'Спасибо за вашу оценку. Жаль, что ваши ожидания не оправдались.'
-FORM_OFFER = ('Команда фестиваля «Ничего страшного» будет '
-                 'рада вашему отклику! Для этого мы прикрепляем '
-                 'здесь небольшую форму, заполнение которой займёт '
-                 'не больше минуты')
+FORM_OFFER = ('Команда фестиваля «Ничего страшного» будет рада вашему '
+              'отклику! Для этого мы прикрепляем небольшую форму, заполнение '
+              'которой займёт не больше минуты')
 FORM_OFFER_TIME_LIMIT = 60
 WEB_APP_BUTTON_TEXT = 'Пройти опрос'
 WEB_APP_BUTTON_URL = 'https://9722ba.creatium.site/'
