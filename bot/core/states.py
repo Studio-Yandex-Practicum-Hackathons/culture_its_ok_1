@@ -4,6 +4,7 @@ from aiogram.fsm import state
 class NewUser(state.StatesGroup):
     name_input = state.State()
     age_input = state.State()
+    hobby_input = state.State()
 
 
 class Route(state.StatesGroup):
@@ -15,7 +16,7 @@ class Route(state.StatesGroup):
 
 
 class Admin(state.StatesGroup):
-    route_selection = state.State()
     report_selection = state.State()
+    route_selection = state.State()
     period_selection = state.State()
     email_input = state.State()

@@ -24,6 +24,8 @@ ENTER_NAME = 'Пожалуйста, введите ваше имя.'
 ENTER_REAL_NAME = 'Пожалуйста, введите ваше настоящее имя.'
 ENTER_AGE = 'Пожалуйста, введите ваш возраст.'
 ENTER_REAL_AGE = 'Пожалуйста, введите ваш настоящий возраст.'
+ENTER_HOBBIES = ('Пожалуйста, укажите через запятую несколько из ваших '
+                 'увлечений, хобби')
 NICE_TO_MEET = '{}, приятно познакомиться!'
 # ----------------------
 
@@ -46,7 +48,7 @@ async def name_input(
         await answer_with_delay(message, state, ENTER_REAL_NAME)
         return
 
-    await state.update_data({'user': dict(name=message.text)})
+    await state.update_data({'user_name': message.text.strip()})
     await age_input(message, state, session)
 
 
@@ -64,20 +66,44 @@ async def age_input(
 
     if (
         not message.text.isdecimal() or
-        (int(message.text) < MIN_AGE or int(message.text) > MAX_AGE)
+        not MIN_AGE <= int(message.text) <= MAX_AGE
     ):
         await answer_with_delay(message, state, ENTER_REAL_AGE)
         return
 
-    # сохраняем пользователя
-    state_data = await state.get_data()
-    user = {
-        'id': message.from_user.id,
-        **state_data['user'],
-        'age': int(message.text)
-    }
-    await user_crud.create(user, session)
+    await state.update_data({'user_age': int(message.text)})
+    await hobby_input(message, state, session)
 
-    await answer_with_delay(message, state, NICE_TO_MEET.format(user['name']))
-    await reset_state(state, next_delay=2)
-    await route_selection(message, state, session)
+
+@router.message(NewUser.hobby_input, F.text)
+@log_dec(logger)
+async def hobby_input(
+        message: types.Message,
+        state: context.FSMContext,
+        session: AsyncSession
+):
+    if await state.get_state() != NewUser.hobby_input:
+        await answer_with_delay(message, state, ENTER_HOBBIES)
+        await state.set_state(NewUser.hobby_input)
+        return
+
+    if message.text.strip():
+        # сохраняем пользователя
+        state_data = await state.get_data()
+
+        hobbies = ', '.join(
+            [interest.lower() for interest in message.text.strip().split(',')]
+        )
+
+        user = {
+            'id': message.from_user.id,
+            'name': state_data['user_name'],
+            'age': state_data['user_age'],
+            'hobbies': hobbies
+        }
+        await user_crud.create(user, session)
+
+        await answer_with_delay(message, state,
+                                NICE_TO_MEET.format(user['name']))
+        await reset_state(state, next_delay=2)
+        await route_selection(message, state, session)

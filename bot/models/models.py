@@ -82,7 +82,7 @@ class RouteStage(Base):
     stage_id = Column(ForeignKey('culture_stage.id'), primary_key=True)
     stage_priority = Column(Integer, nullable=False)
 
-    stage = relationship("Stage", lazy="joined")  # noqa: VNE003
+    stage = relationship("Stage", lazy="joined")
 
 
 class StageStep(Base):
@@ -97,7 +97,7 @@ class User(Base):
     id = Column(BigInteger, primary_key=True)  # noqa: VNE003
     name = Column(String(255), nullable=False)
     age = Column(Integer, nullable=False)
-    interests = Column(String(255))
+    hobbies = Column(String(255))
 
     def __repr__(self):
         return f'Пользователь ({self.name}:{self.age})'
@@ -107,8 +107,8 @@ class Progress(Base):
     user_id = Column(ForeignKey('culture_user.id'))
     route_id = Column(ForeignKey('culture_route.id'))
     stage_id = Column(ForeignKey('culture_stage.id'))
-    started_at = Column(DateTime, nullable=False, default=datetime.now)
-    finished_at = Column(DateTime)
+    started_at = Column(DateTime(timezone=True), nullable=False, default=datetime.now)  # noqa:E501
+    finished_at = Column(DateTime(timezone=True))
     rating = Column(Integer)
 
 
@@ -116,7 +116,7 @@ class Reflection(Base):
     user_id = Column(ForeignKey('culture_user.id'))
     route_id = Column(ForeignKey('culture_route.id'))
     stage_id = Column(ForeignKey('culture_stage.id'))
-    created_at = Column(DateTime, nullable=False, default=datetime.now)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.now)  # noqa:E501
     question = Column(Text, nullable=False)
     answer = Column(Text)
     voice = Column(String(255))

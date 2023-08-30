@@ -1,5 +1,6 @@
 import re
 from asyncio import sleep
+from datetime import datetime
 
 from aiogram import types
 from aiogram.fsm import context
@@ -138,6 +139,15 @@ async def delete_inline_keyboard(
     await message.edit_reply_markup(reply_markup=None)
 
 
+async def delete_inline_keyboard_after_delay(
+        message: types.Message,
+        delay: int,
+):
+    """Функция удаляет инлайн клавиатуру у полученного сообщения."""
+    await sleep(delay)
+    await message.edit_reply_markup(reply_markup=None)
+
+
 def text_reading_time(
         text: str | None,
         words_per_minute: int = settings.bot.reading_speed
@@ -195,3 +205,12 @@ def trim_audio(file_path: str, target_duration_s: int) -> None:
     target_duration_ms = target_duration_s * 1000
     if audio_duration_ms > target_duration_ms:
         audio[:target_duration_ms].export(file_path, format="mp3")
+
+
+def date_str_to_datetime(date: str, delimiter: str = '.'):
+    """Преобразовывает дату в формате ДД.ММ.ГГГГ в datetime."""
+    return datetime(*reversed(list(map(int, date.split(delimiter)))))
+
+
+def calc_avg(values: list[int], n_digits: int) -> float:
+    return round(sum(values) / len(values), n_digits)
