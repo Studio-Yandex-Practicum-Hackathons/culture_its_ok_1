@@ -4,6 +4,7 @@ from aiogram.fsm import state
 class NewUser(state.StatesGroup):
     name_input = state.State()
     age_input = state.State()
+    hobby_input = state.State()
 
 
 class Route(state.StatesGroup):
