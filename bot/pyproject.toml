@@ -17,6 +17,8 @@ aiogoogle = "4.2.0"
 setuptools = "^68.1.2"
 redis = "^5.0.0"
 pydub = "^0.25.1"
+vosk = "^0.3.45"
+ffmpeg = "^1.4"
 
 [build-system]
 requires = ["poetry-core"]
