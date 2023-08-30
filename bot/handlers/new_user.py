@@ -66,7 +66,7 @@ async def age_input(
 
     if (
         not message.text.isdecimal() or
-        (int(message.text) < MIN_AGE or int(message.text) > MAX_AGE)
+        not MIN_AGE <= int(message.text) <= MAX_AGE
     ):
         await answer_with_delay(message, state, ENTER_REAL_AGE)
         return
@@ -87,15 +87,19 @@ async def hobby_input(
         await state.set_state(NewUser.hobby_input)
         return
 
-    interests = message.text.strip()
-    if interests:
+    if message.text.strip():
         # сохраняем пользователя
         state_data = await state.get_data()
+
+        hobbies = ', '.join(
+            [interest.lower() for interest in message.text.strip().split(',')]
+        )
+
         user = {
             'id': message.from_user.id,
             'name': state_data['user_name'],
             'age': state_data['user_age'],
-            'interests': interests
+            'hobbies': hobbies
         }
         await user_crud.create(user, session)
 
