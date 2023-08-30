@@ -11,6 +11,7 @@ pillow = "9.0.0"
 python-dotenv = "^1.0.0"
 psycopg2-binary = "2.9.5"
 uwsgi = "2.0.21"
+django-tinymce4-lite = "^1.8.0"
 
 [build-system]
 requires = ["poetry-core"]

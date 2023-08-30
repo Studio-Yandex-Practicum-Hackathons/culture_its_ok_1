@@ -1,5 +1,7 @@
-from culture.utils import resize_photo
 from django.db import models
+from tinymce.models import HTMLField
+
+from culture.utils import resize_photo
 
 
 class Route(models.Model):
@@ -11,7 +13,7 @@ class Route(models.Model):
         upload_to='photos',
         verbose_name='Обложка'
     )
-    description = models.TextField(
+    description = HTMLField(
         verbose_name='Описание'
     )
     address = models.CharField(
@@ -48,7 +50,7 @@ class Stage(models.Model):
         null=True,
         verbose_name='Адрес',
     )
-    how_to_get = models.TextField(
+    how_to_get = HTMLField(
         blank=True,
         null=True,
         verbose_name='Как добраться',
@@ -83,7 +85,7 @@ class Step(models.Model):
         choices=TYPE_CHOICES,
         verbose_name='Тип шага'
     )
-    content = models.TextField(
+    content = HTMLField(
         blank=True,
         null=True,
         verbose_name='Текстовое содержимое',

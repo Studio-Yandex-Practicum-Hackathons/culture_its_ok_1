@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'culture.apps.CultureDbConfig',
+    'tinymce',
 ]
 
 MIDDLEWARE = [
@@ -101,3 +102,21 @@ MEDIA_ROOT = BASE_DIR / 'media/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TINYMCE_DEFAULT_CONFIG = {
+    'language': 'ru',
+    'browser_spellcheck': True,
+    'theme': 'modern',
+    'height': 360,
+    'width': 1360,
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 20,
+    'selector': 'textarea',
+    'menubar': False,
+    'toolbar': 'undo redo | styleselect | bold italic ',
+    'toolbar_items_size': 'medium',
+    'valid_elements': (
+        'b, strong, i, em, u, ins, s, strike, del, span[class|tg-spoiler], '
+        'tg-spoiler, a[href], code, pre'
+    ),
+}
