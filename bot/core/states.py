@@ -15,7 +15,7 @@ class Route(state.StatesGroup):
 
 
 class Admin(state.StatesGroup):
-    route_selection = state.State()
     report_selection = state.State()
+    route_selection = state.State()
     period_selection = state.State()
     email_input = state.State()

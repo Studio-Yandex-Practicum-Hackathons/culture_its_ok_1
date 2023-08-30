@@ -1,10 +1,12 @@
 import re
 from asyncio import sleep
+from datetime import datetime
 
 from aiogram import types
 from aiogram.fsm import context
 from core.config import MEDIA_DIR, settings
 from core.exceptions import LogicalError
+from pydub import AudioSegment
 
 EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 CHAT_ACTION_PERIOD = 5
@@ -194,3 +196,21 @@ def parse_quiz(content: str) -> dict:
         'options': options,
         'correct_option_id': correct_option_id
     }
+
+
+def trim_audio(file_path: str, target_duration_s: int) -> None:
+    """Функция обрезает файл голосового сообщения до заданной длины."""
+    audio = AudioSegment.from_file(file_path)
+    audio_duration_ms = len(audio)
+    target_duration_ms = target_duration_s * 1000
+    if audio_duration_ms > target_duration_ms:
+        audio[:target_duration_ms].export(file_path, format="mp3")
+
+
+def date_str_to_datetime(date: str, delimiter: str = '.'):
+    """Преобразовывает дату в формате ДД.ММ.ГГГГ в datetime."""
+    return datetime(*reversed(list(map(int, date.split(delimiter)))))
+
+
+def calc_avg(values: list[int], n_digits: int) -> float:
+    return round(sum(values) / len(values), n_digits)
