@@ -26,15 +26,6 @@ async def cmd_start(
         state: context.FSMContext,
         session: AsyncSession
 ):
-    # from keyboards.inline import get_one_button_inline_keyboard
-    # await message.answer_poll(
-    #     question='Интересы?',
-    #     options=['1','2','3'],
-    #     allows_multiple_answers=True,
-    #     allow_sending_without_reply=True
-    # )
-    #
-    # return
     await reset_state(state, next_delay=0)
     # TODO: удалять накопленные inline-клавиатуры
 

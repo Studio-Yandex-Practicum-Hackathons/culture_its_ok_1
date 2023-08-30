@@ -28,10 +28,10 @@ MIN_RATE = 1
 MAX_RATE = 10
 
 FOUND_BUTTONS = [
-    'Теперь нашёл!',
+    'Найдено!',
+    'Найдено, всё в порядке!',
     'Я на месте',
-    'Я добрался!',
-    'Нашёл, всё в порядке',
+    'Пришлось поискать',
 ]
 
 # ----------------------
@@ -296,7 +296,7 @@ async def route_search(
         )
 
 
-@router.poll_answer()
+@router.poll()
 @log_dec(logger)
 async def route_quiz(
         poll: types.Poll,
