@@ -38,7 +38,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    settings.logging.init_global_logging_level()
     settings.sentry.init_sentry()
 
     asyncio.run(main())
