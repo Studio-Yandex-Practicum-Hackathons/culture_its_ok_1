@@ -40,6 +40,11 @@ def log_exceptions(logger: logging.Logger):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             if settings.bot.debug:
+                if kwargs.get('state'):
+                    state = kwargs["state"]
+                    state_data = await state.get_data()
+                    logger.info(f'state={await kwargs["state"].get_state()}')
+                    logger.info(f'data={state_data.keys()}')
                 logger.info(f'handled by {func.__name__}')
             try:
                 return await func(*args, **kwargs)

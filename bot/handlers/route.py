@@ -366,6 +366,8 @@ async def route_rate(
         session
     )
 
+    await reset_state(state)
+
     #  предложение пройти опрос
     form_offer = await answer_with_delay(
         message,
@@ -378,5 +380,4 @@ async def route_rate(
     )
     await delete_inline_keyboard(form_offer, FORM_OFFER_TIME_LIMIT)
 
-    await reset_state(state)
     await route_selection(message, state, session)
