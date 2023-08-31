@@ -25,7 +25,7 @@ class RouteAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.TextField: {'widget': TinyMCE()},
     }
-    list_display = ('name', 'address', 'is_active', 'description')
+    list_display = ('name', 'address', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('name', 'address')
     inlines = [RouteStageInline]
