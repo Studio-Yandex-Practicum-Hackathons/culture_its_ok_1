@@ -5,7 +5,8 @@ from aiogram.fsm.storage.redis import RedisStorage
 from core.config import settings
 from core.logger import log_exceptions, logger_factory
 from core.middleware import SessionMiddleware, StateMessageMiddleware
-from handlers import admin_router, new_user_router, route_router, start_router, spam_router
+from handlers import (admin_router, new_user_router, route_router, spam_router,
+                      start_router)
 from redis.asyncio import Redis
 
 
