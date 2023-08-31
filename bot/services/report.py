@@ -154,7 +154,8 @@ async def make_reflection_report(
             rows.extend([
                 [],
                 [f'Вопрос: {question}'],
-                *[[answer[0], VOICE_URL + answer[1]] for answer in answers],
+                *[[answer[0], VOICE_URL + answer[1] if answer[1] else None]
+                  for answer in answers],
             ])
 
         rows.extend([
