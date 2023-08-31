@@ -60,15 +60,18 @@ python manage.py createsuperuser
 * Из директории `/infra/data` скопировать файл `routes.json` и папку `media` в контейнер Django:
 ```
 sudo docker compose --file=docker-compose-dev.yaml --env-file=env/.general cp data/routes.json django:/app/
-
+```
+```
 sudo docker compose --file=docker-compose-dev.yaml --env-file=env/.general cp data/media django:/app/
 ```
 * Зайти в контейнер Django под пользоватлеем root и поменять права на папку `media`
 ```
 sudo docker compose --file=docker-compose-dev.yaml --env-file=env/.general exec -u root django bash
-
+```
+```
 python manage.py loaddata routes.json
-
+```
+```
 chown -R admin:admin media
 ```
 
@@ -99,8 +102,8 @@ ___
 * ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 * ![image](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)
 * ![image](https://img.shields.io/badge/Google%20Sheets-34A853?style=for-the-badge&logo=google-sheets&logoColor=white)
-* ![image](https://img.shields.io/badge/sentry-purple?style=for-the-badge&)
+* ![image](https://img.shields.io/badge/sentry-purple?style=for-the-badge&logo=sentry)
 * ![image](https://img.shields.io/badge/alembic-7FFFD4?style=for-the-badge)
-* ![image](https://img.shields.io/badge/sql%20alchemy-grey?style=for-the-badge)
-* ![image](https://img.shields.io/badge/pydantic-FF1493?style=for-the-badge)
-* ![image](https://img.shields.io/badge/poetry-4169E1?style=for-the-badge)
+* ![image](https://img.shields.io/badge/sql%20alchemy-grey?style=for-the-badge&logo=alchemy)
+* ![image](https://img.shields.io/badge/pydantic-FF1493?style=for-the-badge&logo=pydantic)
+* ![image](https://img.shields.io/badge/poetry-4169E1?style=for-the-badge&logo=poetry)
