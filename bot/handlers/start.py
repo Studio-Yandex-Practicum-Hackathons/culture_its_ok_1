@@ -1,15 +1,15 @@
-from aiogram import Router, types, F
+from aiogram import F, Router, types
 from aiogram.filters.command import CommandStart
 from aiogram.fsm import context
 from core.logger import log_exceptions, logger_factory
-from core.utils import answer_with_delay, delete_inline_keyboard, reset_state
-from db.crud import user_crud, route_crud
-from handlers.new_user import name_input
-from handlers.route import route_selection, route_follow
-from handlers.spam import spam_counter
-from sqlalchemy.ext.asyncio import AsyncSession
-from keyboards.inline import get_inline_keyboard
 from core.states import Route
+from core.utils import answer_with_delay, delete_inline_keyboard, reset_state
+from db.crud import route_crud, user_crud
+from handlers.new_user import name_input
+from handlers.route import route_follow, route_selection
+from handlers.spam import spam_counter
+from keyboards.inline import get_inline_keyboard
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = Router()
 logger = logger_factory(__name__)
@@ -60,7 +60,7 @@ async def cmd_start(
                 message,
                 state,
                 CONTINUE_ROUTE.format(route.name),
-                reply_markup=get_inline_keyboard(ROUTE_CONTINUATION_BUTTONS, 2),
+                reply_markup=get_inline_keyboard(ROUTE_CONTINUATION_BUTTONS, 2),  # noqa: E501
                 next_delay=0
             )
             return
@@ -87,7 +87,7 @@ async def route_start(
     if callback.data == CALLBACK_CONTINUE:
         state_data = await state.get_data()
         current_step = state_data['current_step']
-        if state_data['steps'][current_step]['type'] in ('continue_button', 'quiz'):
+        if state_data['steps'][current_step]['type'] in ('continue_button', 'quiz'):  # noqa: E501
             # если пользователь прервал маршрут перед получением квиза или
             # инлайн кнопок, откатываемся на два шага назад, чтобы отправить
             # контекст, без которого очередной шаг будет непонятен

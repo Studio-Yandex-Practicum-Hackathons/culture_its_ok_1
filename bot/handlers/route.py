@@ -14,8 +14,7 @@ from core.states import Route
 from core.storage import storage
 from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
                         answer_with_delay, delete_inline_keyboard,
-                        delete_keyboard,
-                        parse_quiz, reset_state, trim_audio)
+                        delete_keyboard, parse_quiz, reset_state, trim_audio)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from handlers.spam import INSTRUCTION, spam_counter
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,

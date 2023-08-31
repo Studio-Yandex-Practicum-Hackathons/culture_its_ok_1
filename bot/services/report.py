@@ -1,6 +1,6 @@
+from collections import defaultdict
 from datetime import datetime, timedelta
 from enum import IntEnum
-from collections import defaultdict
 
 from core.utils import calc_avg, date_str_to_datetime
 from db.crud import progress_crud, reflection_crud, route_crud, user_crud

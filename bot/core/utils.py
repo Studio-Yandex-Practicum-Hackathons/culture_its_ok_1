@@ -21,7 +21,7 @@ async def reset_state(
     next_delay."""
     state_data = await state.get_data()
     if next_delay is None:
-        next_delay = state_data['next_delay'] if state_data['next_delay'] else 0
+        next_delay = state_data['next_delay'] if state_data.get('next_delay') else 0  # noqa: E501
     await state.clear()
     await state.set_data({'next_delay': next_delay})
 
@@ -69,7 +69,7 @@ async def answer_with_delay(
                                  'typing')
     if current_state != await state.get_state():
         # пользователь изменил состояние бота, прерываем отправку сообщения
-        return
+        return message
 
     if next_delay is None:
         next_delay = text_reading_time(text)
@@ -98,7 +98,7 @@ async def answer_photo_with_delay(
                                  'upload_photo')
     if current_state != await state.get_state():
         # пользователь изменил состояние бота, прерываем отправку фотографии
-        return
+        return message
 
     if next_delay is None:
         next_delay = settings.bot.photo_show_delay + text_reading_time(caption)
@@ -126,7 +126,7 @@ async def answer_poll_with_delay(
                                  'typing')
     if current_state != await state.get_state():
         # пользователь сбросил бота или перешёл в админку
-        return
+        return message
 
     await state.update_data({'next_delay': 1})
 
