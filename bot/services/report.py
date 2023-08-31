@@ -153,7 +153,7 @@ async def make_reflection_report(
         for question, answers in question_to_answers.items():
             rows.extend([
                 [],
-                [question],
+                [f'Вопрос: {question}'],
                 *[[answer[0], VOICE_URL + answer[1]] for answer in answers],
             ])
 
