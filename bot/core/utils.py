@@ -6,7 +6,10 @@ from aiogram import types
 from aiogram.fsm import context
 from core.config import MEDIA_DIR, settings
 from core.exceptions import LogicalError
+import json
 from pydub import AudioSegment
+from vosk import Model, KaldiRecognizer
+import soundfile as sf
 
 EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 CHAT_ACTION_PERIOD = 3
@@ -224,7 +227,7 @@ def trim_audio(file_path: str, target_duration_s: int) -> None:
     if audio_duration_ms > target_duration_ms:
         audio[:target_duration_ms].export(file_path, format="mp3")
 
-
+        
 def date_str_to_datetime(date: str, delimiter: str = '.'):
     """Преобразовывает дату в формате ДД.ММ.ГГГГ в datetime."""
     return datetime(*reversed(list(map(int, date.split(delimiter)))))
@@ -234,3 +237,25 @@ def calc_avg(values: list[int], n_digits: int) -> float:
     if not values:
         return 0
     return round(sum(values) / len(values), n_digits)
+
+  
+def speech_to_text(media):
+    """Функция принимает путь к медиафайлу и возвращает текст."""
+    FRAME_RATE = 16000
+    CHANNELS = 1
+    model = Model(r"core/vosk")
+    rec = KaldiRecognizer(model, FRAME_RATE)
+    rec.SetWords(True)
+    # Используя библиотеку pydub и soundfile делаем предобработку аудио
+    data, samplerate = sf.read(media)
+    sf.write('temp.wav', data, samplerate)
+    wav = AudioSegment.from_ogg("temp.wav")
+    # Можно ограничить время аудио в примере первые 10 сек
+    # wav = wav[:10000]
+    wav = wav.set_channels(CHANNELS)
+    wav = wav.set_frame_rate(FRAME_RATE)
+    # Преобразуем вывод в json
+    rec.AcceptWaveform(wav.raw_data)
+    result = rec.Result()
+    text = json.loads(result)["text"]
+    return text
