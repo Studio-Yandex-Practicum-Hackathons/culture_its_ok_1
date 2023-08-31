@@ -9,14 +9,14 @@ from aiogram.fsm import context
 from aiogram.types.web_app_info import WebAppInfo
 from core.config import VOICE_DIR, settings
 from core.exceptions import LogicalError
-from core.logger import log_dec, logger_factory
+from core.logger import log_exceptions, logger_factory
 from core.states import Route
 from core.storage import storage
 from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
                         answer_with_delay, delete_inline_keyboard,
-                        delete_inline_keyboard_after_delay, delete_keyboard,
-                        parse_quiz, reset_state, trim_audio)
+                        delete_keyboard, parse_quiz, reset_state, trim_audio)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
+from handlers.spam import INSTRUCTION, spam_counter
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
                               get_web_app_keyboard, get_yes_no_inline_keyboard)
@@ -57,12 +57,11 @@ FORM_OFFER = ('Команда фестиваля «Ничего страшног
               'которой займёт не больше минуты')
 FORM_OFFER_TIME_LIMIT = 60
 WEB_APP_BUTTON_TEXT = 'Пройти опрос'
-WEB_APP_BUTTON_URL = 'https://9722ba.creatium.site/'
 # ----------------------
 
 
 @router.message(Route.selection, F.text, ~Command(re.compile(r'^.+$')))
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_selection(
         message: types.Message,
         state: context.FSMContext,
@@ -91,13 +90,15 @@ async def route_selection(
         return
 
     if message.text in routes:
+        spam_counter.reset()
         current_route = routes[message.text]
 
         await answer_photo_with_delay(
             message,
             state,
             current_route.photo,
-            current_route.description
+            current_route.description,
+            next_delay=3
         )
         await answer_with_delay(
             message,
@@ -108,10 +109,16 @@ async def route_selection(
                 callback_data=f'route${current_route.id}'
             )
         )
+        return
+
+    # пользователь вводит произвольный текст, вместо выбора маршрута
+    spam_counter.increase()
+    if spam_counter.is_exceeded():
+        await message.answer(INSTRUCTION)
 
 
 @router.callback_query(Route.selection, F.data.startswith('route$'))
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_start(
         callback: types.CallbackQuery,
         state: context.FSMContext,
@@ -120,6 +127,7 @@ async def route_start(
     """Обработчик запуска прохождения маршрута. Принимает колбэк с id
     выбранного пользователем маршрута. Готовит цепочку шагов и запускает их
     прохождение."""
+    spam_counter.reset()
     await delete_keyboard(callback.message)
     await delete_inline_keyboard(callback.message)
     await callback.answer()
@@ -152,7 +160,7 @@ async def route_start(
     await route_follow(callback.message, state, session)
 
 
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_follow(
         message: types.Message,
         state: context.FSMContext,
@@ -166,6 +174,8 @@ async def route_follow(
     last_message = None
 
     while True:
+        spam_counter.reset()
+
         if state_data['current_step'] + 1 >= len(state_data['steps']):
             # больше шагов нет, маршрут окончен
             break
@@ -240,12 +250,13 @@ async def route_follow(
 
 
 @router.message(Route.reflection, F.text | F.voice)
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_reflection(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if message.text:
         answer = message.text[:settings.bot.reflection_text_limit]
         voice = None
@@ -277,12 +288,13 @@ async def route_reflection(
 
 
 @router.callback_query(Route.search, F.data.in_({CALLBACK_YES, CALLBACK_NO}))
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_search(
         callback: types.CallbackQuery,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     await delete_inline_keyboard(callback.message)
     await callback.answer()
 
@@ -305,24 +317,26 @@ async def route_search(
 
 
 @router.poll()
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_quiz(
         poll: types.Poll,
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     await state.set_state(Route.following)
     await route_follow(message, state, session)
 
 
 @router.message(Route.rate, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def route_rate(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if await state.get_state() != Route.rate:
         await state.set_state(Route.rate)
         await answer_with_delay(message, state, RATE_ROUTE)
@@ -351,6 +365,8 @@ async def route_rate(
         session
     )
 
+    await reset_state(state)
+
     #  предложение пройти опрос
     form_offer = await answer_with_delay(
         message,
@@ -358,12 +374,9 @@ async def route_rate(
         FORM_OFFER,
         reply_markup=get_web_app_keyboard(
             WEB_APP_BUTTON_TEXT,
-            WebAppInfo(url=WEB_APP_BUTTON_URL)
+            WebAppInfo(url=settings.bot.survey_url)
         ),
     )
-    await delete_inline_keyboard_after_delay(
-        form_offer, FORM_OFFER_TIME_LIMIT
-    )
+    await delete_inline_keyboard(form_offer, FORM_OFFER_TIME_LIMIT)
 
-    await reset_state(state)
     await route_selection(message, state, session)

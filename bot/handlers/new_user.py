@@ -2,11 +2,12 @@ import re
 
 from aiogram import F, Router, types
 from aiogram.fsm import context
-from core.logger import log_dec, logger_factory
+from core.logger import log_exceptions, logger_factory
 from core.states import NewUser
 from core.utils import answer_with_delay, reset_state
 from db.crud import user_crud
 from handlers.route import route_selection
+from handlers.spam import spam_counter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = Router()
@@ -31,12 +32,13 @@ NICE_TO_MEET = '{}, приятно познакомиться!'
 
 
 @router.message(NewUser.name_input, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def name_input(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if await state.get_state() != NewUser.name_input:
         await answer_with_delay(message, state, ACQUAINTANCE)
         await answer_with_delay(message, state, ENTER_NAME)
@@ -53,12 +55,13 @@ async def name_input(
 
 
 @router.message(NewUser.age_input, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def age_input(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if await state.get_state() != NewUser.age_input:
         await answer_with_delay(message, state, ENTER_AGE)
         await state.set_state(NewUser.age_input)
@@ -66,7 +69,7 @@ async def age_input(
 
     if (
         not message.text.isdecimal() or
-        (int(message.text) < MIN_AGE or int(message.text) > MAX_AGE)
+        not MIN_AGE <= int(message.text) <= MAX_AGE
     ):
         await answer_with_delay(message, state, ENTER_REAL_AGE)
         return
@@ -76,26 +79,31 @@ async def age_input(
 
 
 @router.message(NewUser.hobby_input, F.text)
-@log_dec(logger)
+@log_exceptions(logger)
 async def hobby_input(
         message: types.Message,
         state: context.FSMContext,
         session: AsyncSession
 ):
+    spam_counter.reset()
     if await state.get_state() != NewUser.hobby_input:
         await answer_with_delay(message, state, ENTER_HOBBIES)
         await state.set_state(NewUser.hobby_input)
         return
 
-    interests = message.text.strip()
-    if interests:
+    if message.text.strip():
         # сохраняем пользователя
         state_data = await state.get_data()
+
+        hobbies = ', '.join(
+            [interest.lower() for interest in message.text.strip().split(',')]
+        )
+
         user = {
             'id': message.from_user.id,
             'name': state_data['user_name'],
             'age': state_data['user_age'],
-            'interests': interests
+            'hobbies': hobbies
         }
         await user_crud.create(user, session)
 
