@@ -39,6 +39,7 @@ class BotSettings(EnvBase):
     photo_show_delay: int
     reflection_text_limit: int
     reflection_voice_limit: int
+    survey_url: str
 
 
 class LoggingSettings(EnvBase):
