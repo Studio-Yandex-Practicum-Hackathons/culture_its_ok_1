@@ -74,6 +74,13 @@ class Stage(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if self.how_to_get:
+            self.how_to_get = re.sub(r'<span>', '', self.how_to_get)
+            self.how_to_get = re.sub(r'</span>', '', self.how_to_get)
+
+        super().save(*args, **kwargs)
+
 
 class Step(models.Model):
     TYPE_CHOICES = [
@@ -122,6 +129,10 @@ class Step(models.Model):
         super().save(*args, **kwargs)
         if self.photo:
             resize_photo(self.photo.path)
+        if self.content:
+            self.content = re.sub(r'<span>', '', self.content)
+            self.content = re.sub(r'</span>', '', self.content)
+        super().save(*args, **kwargs)
 
 
 class RouteStage(models.Model):
