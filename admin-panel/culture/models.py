@@ -1,5 +1,9 @@
-from culture.utils import resize_photo
+import re
+
 from django.db import models
+from tinymce.models import HTMLField
+
+from culture.utils import resize_photo
 
 
 class Route(models.Model):
@@ -11,7 +15,7 @@ class Route(models.Model):
         upload_to='photos',
         verbose_name='Обложка'
     )
-    description = models.TextField(
+    description = HTMLField(
         verbose_name='Описание'
     )
     address = models.CharField(
@@ -35,6 +39,10 @@ class Route(models.Model):
         super().save(*args, **kwargs)
         if self.photo:
             resize_photo(self.photo.path)
+        if self.description:
+            self.description = re.sub(r'<span>', '', self.description)
+            self.description = re.sub(r'</span>', '', self.description)
+        super().save(*args, **kwargs)
 
 
 class Stage(models.Model):
@@ -48,7 +56,7 @@ class Stage(models.Model):
         null=True,
         verbose_name='Адрес',
     )
-    how_to_get = models.TextField(
+    how_to_get = HTMLField(
         blank=True,
         null=True,
         verbose_name='Как добраться',
@@ -65,6 +73,13 @@ class Stage(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.how_to_get:
+            self.how_to_get = re.sub(r'<span>', '', self.how_to_get)
+            self.how_to_get = re.sub(r'</span>', '', self.how_to_get)
+
+        super().save(*args, **kwargs)
 
 
 class Step(models.Model):
@@ -83,7 +98,7 @@ class Step(models.Model):
         choices=TYPE_CHOICES,
         verbose_name='Тип шага'
     )
-    content = models.TextField(
+    content = HTMLField(
         blank=True,
         null=True,
         verbose_name='Текстовое содержимое',
@@ -114,6 +129,10 @@ class Step(models.Model):
         super().save(*args, **kwargs)
         if self.photo:
             resize_photo(self.photo.path)
+        if self.content:
+            self.content = re.sub(r'<span>', '', self.content)
+            self.content = re.sub(r'</span>', '', self.content)
+        super().save(*args, **kwargs)
 
 
 class RouteStage(models.Model):

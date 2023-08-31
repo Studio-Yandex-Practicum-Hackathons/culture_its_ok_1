@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'culture.apps.CultureDbConfig',
+    'tinymce',
 ]
 
 MIDDLEWARE = [
@@ -67,7 +68,6 @@ DATABASES = {
     }
 }
 
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -101,3 +101,31 @@ MEDIA_ROOT = BASE_DIR / 'media/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TINYMCE_DEFAULT_CONFIG = {
+    'language': 'ru',
+    'browser_spellcheck': True,
+    'theme': 'modern',
+    'height': 360,
+    'width': 1360,
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 20,
+    'selector': 'textarea',
+    'menubar': False,
+    'branding': False,
+    'toolbar': 'undo redo | bold italic underline del strikethrough | link',
+    'plugins': 'link',
+    'toolbar_items_size': 'medium',
+    'valid_elements': (
+        'b,strong,i,em,u,ins,s,strike,del,'
+        'span[class|tg-spoiler],a[href],code,pre'
+    ),
+    'valid_children': '+a[span],+span[a|b|strong|i|em|u|ins|s|'
+                      'strike|del|code|pre],+a[href|b|strong|i|em|u|'
+                      'ins|s|strike|del|code|pre],+span[class|tg-spoiler]',
+    'extended_valid_elements': (
+        'a[href|target|data-id|class],span[class|tg-spoiler]'
+    ),
+    'forced_root_block': False,
+    'entity_encoding': 'raw',
+}
