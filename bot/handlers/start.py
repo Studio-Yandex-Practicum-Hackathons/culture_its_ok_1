@@ -28,7 +28,7 @@ async def cmd_start(
         session: AsyncSession
 ):
     spam_counter.reset()
-    await reset_state(state, next_delay=0)
+    await state.update_data({'next_delay': 0})
     # TODO: удалять накопленные inline-клавиатуры
 
     await answer_with_delay(message, state, WELCOME,
@@ -37,6 +37,9 @@ async def cmd_start(
     user = await user_crud.get(message.from_user.id, session)
     if user and message.from_user.id == user.id:
         await answer_with_delay(message, state, GREETING.format(user.name))
+        # state_data = await state.get_data()
+        # if state_data.get('current_step') and state_data['current_step'] < state_data['steps']:
+        #     await answer_with_delay(message, state, 'Обнаружен незавершённый маршрут')
         await route_selection(message, state, session)
         return
 

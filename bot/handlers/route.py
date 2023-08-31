@@ -14,7 +14,7 @@ from core.states import Route
 from core.storage import storage
 from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
                         answer_with_delay, delete_inline_keyboard,
-                        delete_inline_keyboard_after_delay, delete_keyboard,
+                        delete_keyboard,
                         parse_quiz, reset_state, trim_audio)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
@@ -58,7 +58,6 @@ FORM_OFFER = ('Команда фестиваля «Ничего страшног
               'которой займёт не больше минуты')
 FORM_OFFER_TIME_LIMIT = 60
 WEB_APP_BUTTON_TEXT = 'Пройти опрос'
-WEB_APP_BUTTON_URL = 'https://9722ba.creatium.site/'
 # ----------------------
 
 
@@ -99,7 +98,8 @@ async def route_selection(
             message,
             state,
             current_route.photo,
-            current_route.description
+            current_route.description,
+            next_delay=3
         )
         await answer_with_delay(
             message,
@@ -373,12 +373,10 @@ async def route_rate(
         FORM_OFFER,
         reply_markup=get_web_app_keyboard(
             WEB_APP_BUTTON_TEXT,
-            WebAppInfo(url=WEB_APP_BUTTON_URL)
+            WebAppInfo(url=settings.bot.survey_url)
         ),
     )
-    await delete_inline_keyboard_after_delay(
-        form_offer, FORM_OFFER_TIME_LIMIT
-    )
+    await delete_inline_keyboard(form_offer, FORM_OFFER_TIME_LIMIT)
 
     await reset_state(state)
     await route_selection(message, state, session)

@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from enum import IntEnum
+from collections import defaultdict
 
 from core.utils import calc_avg, date_str_to_datetime
 from db.crud import progress_crud, reflection_crud, route_crud, user_crud
@@ -18,26 +19,23 @@ async def make_users_report(
         email: str,
         **kwargs
 ) -> str:
-    users = await user_crud.get_all(session, sort='name asc')
-
-    today = datetime.now().strftime('%d.%m.%Y')
     title = 'Отчёт по пользователям бота арт-медитации АНО "Культура"'
     header = [
         [title],
-        ['Дата', today],
         [],
         ['Имя', 'Возраст', 'Интересы', 'Сколько раз воспользовались ботом'],
     ]
-
     rows = []
+
+    users = await user_crud.get_all(session, sort='name asc')
     for user in users:
-        used_amount = await progress_crud.get_user_usage(user.id, session)
+        used_amount = await progress_crud.get_usage_count(user.id, session)
         rows.extend([
              [user.name, user.age, user.hobbies, used_amount]
         ])
 
     report = GoogleReport()
-    report.set_title(f'{title} от {today}')
+    report.set_title(f'{title} от {datetime.now().strftime("%d.%m.%Y")}')
     report.set_header(header)
     report.add_rows(rows)
     report.set_email(email)
@@ -53,11 +51,11 @@ async def make_routes_report(
 ) -> str:
     routes = await route_crud.get_all(session, sort='id asc')
 
-    today = datetime.now().strftime('%d.%m.%Y')
     title = 'Отчёт по маршрутам бота арт-медитации АНО "Культура"'
     header = [
         [title],
-        ['Период', start, end],
+        [],
+        [f'Период: {start} - {end}'],
         [],
         *([f'Маршрут {i}', route.name] for i, route in enumerate(routes, 1)),
         [],
@@ -72,7 +70,7 @@ async def make_routes_report(
     ]
 
     for route in routes:
-        progress = await progress_crud.get_all_by_route_and_range(
+        progress = await progress_crud.get_all_by_route_and_date_range(
             route.id,
             date_str_to_datetime(start),
             date_str_to_datetime(end) + timedelta(days=1),
@@ -80,7 +78,7 @@ async def make_routes_report(
         )
 
         finished = [p for p in progress if p.finished_at]
-        finished_rate = round(len(finished) / len(progress) * 100, 0)
+        finished_rate = round(len(finished) / len(progress) * 100, 0) if progress else 0  # noqa
         unique_users = {p.user_id for p in progress}
         rates = [p.rating for p in progress if p.rating]
         route_running_m = [
@@ -89,13 +87,13 @@ async def make_routes_report(
         ]
 
         rows[0].append(len(progress))
-        rows[1].append(f'{len(finished)} ({finished_rate})%')
+        rows[1].append(f'{len(finished)} ({finished_rate}%)')
         rows[2].append(len(unique_users))
         rows[3].append(calc_avg(route_running_m, 0))
         rows[4].append(f'{calc_avg(rates, 1)} ({len(rates)})')
 
     report = GoogleReport()
-    report.set_title(f'{title} от {today}')
+    report.set_title(f'{title} от {datetime.now().strftime("%d.%m.%Y")}')
     report.set_header(header)
     report.add_rows(rows)
     report.set_email(email)
@@ -115,8 +113,11 @@ async def make_reflection_report(
     header = [
         [title],
         [],
-        ['Маршрут', route.name],
-        ['Период', start, end],
+        [f'Маршрут: {route.name}'],
+        [],
+        [f'Период: {start} - {end}'],
+        [],
+        ['Текстовое содержимое рефлексии', 'Аудиофайл'],
         [],
     ]
     rows = []
@@ -130,14 +131,14 @@ async def make_reflection_report(
             session
         )
 
-        if reflections:
-            rows.extend([
-                [stage.name]
-            ])
+        if not reflections:
+            continue
 
-        question_to_answers = {}
-        for reflection in reflections:
-            question_to_answers[reflection.question] = []
+        rows.extend([
+            [stage.name]
+        ])
+
+        question_to_answers = defaultdict(list)
         for reflection in reflections:
             question_to_answers[reflection.question].append(
                 [reflection.answer, reflection.voice]
@@ -146,7 +147,6 @@ async def make_reflection_report(
         for question, answers in question_to_answers.items():
             rows.extend([
                 [question],
-                ['Текстовое содержимое рефлексии', 'Аудиофайл'],
                 *[[answer[0], answer[1]] for answer in answers],
             ])
 

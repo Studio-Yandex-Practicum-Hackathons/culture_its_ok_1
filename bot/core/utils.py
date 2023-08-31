@@ -57,7 +57,12 @@ async def answer_with_delay(
     отправляется уведомление, что бот печатает. Переменная next_delay отвечает
     за задержку перед показом следующего сообщения."""
     state_data = await state.get_data()
+
+    current_state = await state.get_state()
     await delay_with_chat_action(message, state_data['next_delay'], 'typing')
+    if current_state != await state.get_state():
+        # пользователь сбросил бота или перешёл в админку
+        return
 
     if next_delay is None:
         next_delay = text_reading_time(text)
@@ -80,8 +85,13 @@ async def answer_photo_with_delay(
     отправляется уведомление, что бот загружает фото. Переменная next_delay
     отвечает за задержку перед показом следующего сообщения."""
     state_data = await state.get_data()
+
+    current_state = await state.get_state()
     await delay_with_chat_action(message, state_data['next_delay'],
                                  'upload_photo')
+    if current_state != await state.get_state():
+        # пользователь сбросил бота или перешёл в админку
+        return
 
     if next_delay is None:
         next_delay = settings.bot.photo_show_delay + text_reading_time(caption)
@@ -104,7 +114,13 @@ async def answer_poll_with_delay(
     в предыдущем сообщении. При этом, во время задержки пользователю
     отправляется уведомление, что бот печатает."""
     state_data = await state.get_data()
+
+    current_state = await state.get_state()
     await delay_with_chat_action(message, state_data['next_delay'], 'typing')
+    if current_state != await state.get_state():
+        # пользователь сбросил бота или перешёл в админку
+        return
+
     await state.update_data({'next_delay': 1})
 
     return await message.answer_poll(type='quiz', **kwargs)
@@ -134,17 +150,12 @@ async def delete_keyboard(
 
 async def delete_inline_keyboard(
         message: types.Message,
+        delay: int | None = None
 ):
-    """Функция удаляет инлайн клавиатуру у полученного сообщения."""
-    await message.edit_reply_markup(reply_markup=None)
-
-
-async def delete_inline_keyboard_after_delay(
-        message: types.Message,
-        delay: int,
-):
-    """Функция удаляет инлайн клавиатуру у полученного сообщения."""
-    await sleep(delay)
+    """Функция удаляет инлайн клавиатуру у полученного сообщения. Если
+    установлена задержка delay, сделает это после задержки."""
+    if delay:
+        await sleep(delay)
     await message.edit_reply_markup(reply_markup=None)
 
 
@@ -213,4 +224,6 @@ def date_str_to_datetime(date: str, delimiter: str = '.'):
 
 
 def calc_avg(values: list[int], n_digits: int) -> float:
+    if not values:
+        return 0
     return round(sum(values) / len(values), n_digits)
