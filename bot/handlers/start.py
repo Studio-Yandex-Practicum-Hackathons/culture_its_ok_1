@@ -83,16 +83,17 @@ async def route_start(
     прерванный маршрут или перейти к выбору маршрутов, чтобы начать заново."""
     spam_counter.reset()
     await delete_inline_keyboard(callback.message)
+
     if callback.data == CALLBACK_CONTINUE:
         state_data = await state.get_data()
         current_step = state_data['current_step']
         if state_data['steps'][current_step]['type'] in ('continue_button', 'quiz'):
-            # Если пользователь прервал маршрут перед получением квиза или
+            # если пользователь прервал маршрут перед получением квиза или
             # инлайн кнопок, откатываемся на два шага назад, чтобы отправить
             # контекст, без которого очередной шаг будет непонятен
             current_step -= 2
         else:
-            # Откатываемся на шаг назад, т.к. функция хождения по маршруту
+            # откатываемся на шаг назад, т.к. функция хождения по маршруту
             # увеличивает current_step перед отправкой очередного сообщения
             current_step -= 1
         await state.update_data({'current_step': max(current_step, 0)})
@@ -100,5 +101,6 @@ async def route_start(
         await route_follow(callback.message, state, session)
         return
 
+    # пользователь решил начать заново
     await reset_state(state, next_delay=0)
     await route_selection(callback.message, state, session)

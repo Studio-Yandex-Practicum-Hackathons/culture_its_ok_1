@@ -21,19 +21,21 @@ async def reset_state(
     next_delay."""
     state_data = await state.get_data()
     if next_delay is None:
-        next_delay = state_data['next_delay']
+        next_delay = state_data['next_delay'] if state_data['next_delay'] else 0
     await state.clear()
     await state.set_data({'next_delay': next_delay})
 
 
 async def delay_with_chat_action(
         message: types.Message,
+        state: context.FSMContext,
         delay: int,
         chat_action: str
 ):
     """Т.к. отправка действия пользователю о том, что "бот печатает" или
-    "бот загружает фото" имеет срок действия около 5 секунд, функция спит delay
-    секунд, но при этом обновляет отправленное действие каждые 5 секунд"""
+    "бот отправляет фото" имеет срок действия около 5 секунд, функция спит
+    delay секунд, но при этом обновляет отправленное действие каждые
+    CHAT_ACTION_PERIOD секунд."""
     delays = [CHAT_ACTION_PERIOD] * (delay // CHAT_ACTION_PERIOD)
     if delay % CHAT_ACTION_PERIOD:
         delays.append(delay % CHAT_ACTION_PERIOD)
@@ -41,7 +43,11 @@ async def delay_with_chat_action(
     for delay in delays:
         await message.bot.send_chat_action(chat_id=message.chat.id,
                                            action=chat_action)
+        current_state = await state.get_state()
         await sleep(delay)
+        if current_state != await state.get_state():
+            # пользователь изменил состояние бота, прерываем отправку действия
+            break
 
 
 async def answer_with_delay(
@@ -59,9 +65,10 @@ async def answer_with_delay(
     state_data = await state.get_data()
 
     current_state = await state.get_state()
-    await delay_with_chat_action(message, state_data['next_delay'], 'typing')
+    await delay_with_chat_action(message, state, state_data['next_delay'],
+                                 'typing')
     if current_state != await state.get_state():
-        # пользователь сбросил бота или перешёл в админку
+        # пользователь изменил состояние бота, прерываем отправку сообщения
         return
 
     if next_delay is None:
@@ -79,18 +86,18 @@ async def answer_photo_with_delay(
     next_delay: int | None = None,
     **kwargs
 ):
-    """Функция отправляет фотографию с предварительной задержкой, равной
-    времени прочтения текста/просмотра фотографии пользователем, отправленных
-    в предыдущем сообщении. При этом, во время задержки пользователю
-    отправляется уведомление, что бот загружает фото. Переменная next_delay
-    отвечает за задержку перед показом следующего сообщения."""
+    """Функция отправляет фотографию с предварительной задержкой, которая
+    берётся из текущего состояния state. При этом, во время задержки
+    пользователю отправляется уведомление, что бот загружает фото.
+    Переменная next_delay отвечает за задержку перед показом следующего
+    сообщения."""
     state_data = await state.get_data()
 
     current_state = await state.get_state()
-    await delay_with_chat_action(message, state_data['next_delay'],
+    await delay_with_chat_action(message, state, state_data['next_delay'],
                                  'upload_photo')
     if current_state != await state.get_state():
-        # пользователь сбросил бота или перешёл в админку
+        # пользователь изменил состояние бота, прерываем отправку фотографии
         return
 
     if next_delay is None:
@@ -109,14 +116,14 @@ async def answer_poll_with_delay(
     state: context.FSMContext,
     **kwargs
 ):
-    """Функция отправляет квиз с предварительной задержкой, равной времени
-    прочтения текста/просмотра фотографии пользователем, отправленных
-    в предыдущем сообщении. При этом, во время задержки пользователю
+    """Функция отправляет квиз с предварительной задержкой, которая берётся
+    из текущего состояния state. При этом, во время задержки пользователю
     отправляется уведомление, что бот печатает."""
     state_data = await state.get_data()
 
     current_state = await state.get_state()
-    await delay_with_chat_action(message, state_data['next_delay'], 'typing')
+    await delay_with_chat_action(message, state, state_data['next_delay'],
+                                 'typing')
     if current_state != await state.get_state():
         # пользователь сбросил бота или перешёл в админку
         return
