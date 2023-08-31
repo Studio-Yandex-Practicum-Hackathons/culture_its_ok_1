@@ -87,10 +87,10 @@ async def route_start(
     if callback.data == CALLBACK_CONTINUE:
         state_data = await state.get_data()
         current_step = state_data['current_step']
-        if state_data['steps'][current_step]['type'] in ('continue_button', 'quiz'):  # noqa: E501
-            # если пользователь прервал маршрут перед получением квиза или
-            # инлайн кнопок, откатываемся на два шага назад, чтобы отправить
-            # контекст, без которого очередной шаг будет непонятен
+        if state_data['steps'][current_step]['type'] == 'continue_button':
+            # если пользователь прервал маршрут перед получением инлайн кнопок,
+            # откатываемся на два шага назад, чтобы отправить сообщение, к
+            # которому эти кнопки привязываются
             current_step -= 2
         else:
             # откатываемся на шаг назад, т.к. функция хождения по маршруту

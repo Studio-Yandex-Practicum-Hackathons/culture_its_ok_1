@@ -9,7 +9,7 @@ from core.exceptions import LogicalError
 from pydub import AudioSegment
 
 EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-CHAT_ACTION_PERIOD = 5
+CHAT_ACTION_PERIOD = 3
 
 
 async def reset_state(
