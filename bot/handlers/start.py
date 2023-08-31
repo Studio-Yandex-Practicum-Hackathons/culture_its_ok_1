@@ -3,7 +3,8 @@ from aiogram.filters.command import CommandStart
 from aiogram.fsm import context
 from core.logger import log_exceptions, logger_factory
 from core.states import Route
-from core.utils import answer_with_delay, delete_inline_keyboard, reset_state
+from core.utils import (CHAT_ACTION_PERIOD, answer_with_delay,
+                        delete_inline_keyboard, reset_state, sleep)
 from db.crud import route_crud, user_crud
 from handlers.new_user import name_input
 from handlers.route import route_follow, route_selection
@@ -98,6 +99,7 @@ async def route_start(
             current_step -= 1
         await state.update_data({'current_step': max(current_step, 0)})
         await state.set_state(Route.following)
+        await sleep(CHAT_ACTION_PERIOD)
         await route_follow(callback.message, state, session)
         return
 
