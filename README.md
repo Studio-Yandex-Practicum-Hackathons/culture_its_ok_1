@@ -55,7 +55,7 @@ python manage.py createsuperuser
 ```
 
 
-## **Как наполнить базу?**:
+## **Как наполнить базу**:
 
 * Из директории `/infra/data` скопировать файл `routes.json` и папку `media` в контейнер Django:
 ```
@@ -77,20 +77,6 @@ chown -R admin:admin media
 
 
 ___
-## **Разработчики**:
-[Александр Бондаренко](https://github.com/dcomrad) - Тимлид
-
-[Александр Гусаров](https://github.com/GUSICATC) - Разработчик
-
-[Даниил Ларюшин](https://github.com/danlaryushin) - Разработчик
-
-[Полина Николаева](https://github.com/STI-xa) - Разработчик
-
-[Сергей Ткачук](https://github.com/SergeychUK92) - Разработчик
-
-[Ярослав Лошкарев](https://github.com/94R1K) - Разработчик
-
-___
 ## **Стэк технологий**:
 * ![image](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
 * ![image](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)
@@ -107,3 +93,18 @@ ___
 * ![image](https://img.shields.io/badge/sql%20alchemy-grey?style=for-the-badge&logo=alchemy)
 * ![image](https://img.shields.io/badge/pydantic-FF1493?style=for-the-badge&logo=pydantic)
 * ![image](https://img.shields.io/badge/poetry-4169E1?style=for-the-badge&logo=poetry)
+___
+## **Разработчики**:
+[Александр Бондаренко](https://github.com/dcomrad) - Тимлид
+
+[Александр Гусаров](https://github.com/GUSICATC) - Разработчик
+
+[Даниил Ларюшин](https://github.com/danlaryushin) - Разработчик
+
+[Полина Николаева](https://github.com/STI-xa) - Разработчик
+
+[Сергей Ткачук](https://github.com/SergeychUK92) - Разработчик
+
+[Ярослав Лошкарев](https://github.com/94R1K) - Разработчик
+
+___
