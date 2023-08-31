@@ -65,21 +65,21 @@ services:
       - ./env/.django
       - ./env/.postgres
 
-#  bot:
-#    build: ../bot
-#    container_name: culture-bot
-#    restart: on-failure
-#    depends_on:
-#      - postgres
-#    entrypoint: /app/docker-entrypoint.sh
-#    volumes:
-#      - culture_media_data:/app/media/
-#    env_file:
-#      - ./env/.general
-#      - ./env/.bot
-#      - ./env/.postgres
-#      - ./env/.sentry
-#      - ./env/.google
+  bot:
+    build: ../bot
+    container_name: culture-bot
+    restart: on-failure
+    depends_on:
+      - postgres
+    entrypoint: /app/docker-entrypoint.sh
+    volumes:
+      - culture_media_data:/app/media/
+    env_file:
+      - ./env/.general
+      - ./env/.bot
+      - ./env/.postgres
+      - ./env/.sentry
+      - ./env/.google
 
 volumes:
   culture_postgresql_data:
