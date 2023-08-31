@@ -17,12 +17,12 @@ from core.utils import (answer_photo_with_delay, answer_poll_with_delay,
                         delete_keyboard,
                         parse_quiz, reset_state, trim_audio)
 from db.crud import progress_crud, reflection_crud, route_crud, stage_crud
+from handlers.spam import INSTRUCTION, spam_counter
 from keyboards.inline import (CALLBACK_NO, CALLBACK_YES,
                               get_one_button_inline_keyboard,
                               get_web_app_keyboard, get_yes_no_inline_keyboard)
 from keyboards.reply import get_reply_keyboard
 from sqlalchemy.ext.asyncio import AsyncSession
-from handlers.spam import spam_counter, INSTRUCTION
 
 router = Router()
 logger = logger_factory(__name__)
