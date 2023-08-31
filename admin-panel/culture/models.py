@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from tinymce.models import HTMLField
 
@@ -37,6 +39,10 @@ class Route(models.Model):
         super().save(*args, **kwargs)
         if self.photo:
             resize_photo(self.photo.path)
+        if self.description:
+            self.description = re.sub(r'<span>', '', self.description)
+            self.description = re.sub(r'</span>', '', self.description)
+        super().save(*args, **kwargs)
 
 
 class Stage(models.Model):

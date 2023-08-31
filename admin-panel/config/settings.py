@@ -57,17 +57,22 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('POSTGRES_DB'),
+#         'USER': os.getenv('POSTGRES_USER'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+#         'HOST': os.getenv('POSTGRES_HOST'),
+#         'PORT': os.getenv('POSTGRES_PORT')
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('POSTGRES_HOST'),
-        'PORT': os.getenv('POSTGRES_PORT')
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -113,7 +118,9 @@ TINYMCE_DEFAULT_CONFIG = {
     'custom_undo_redo_levels': 20,
     'selector': 'textarea',
     'menubar': False,
-    'toolbar': 'undo redo | styleselect | bold italic ',
+    'branding': False,
+    'toolbar': 'undo redo | bold italic underline del strikethrough | link',
+    'plugins': 'link',
     'toolbar_items_size': 'medium',
     'valid_elements': (
         'b,strong,i,em,u,ins,s,strike,del,'
@@ -126,5 +133,5 @@ TINYMCE_DEFAULT_CONFIG = {
         'a[href|target|data-id|class],span[class|tg-spoiler]'
     ),
     'forced_root_block': False,
-    'entity_encoding': 'raw'
+    'entity_encoding': 'raw',
 }
