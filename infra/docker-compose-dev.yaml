@@ -34,9 +34,9 @@ services:
     hostname: ${NGINX_HOST}
     restart: on-failure
     ports:
-      - ${NGINX_PORT}:${NGINX_PORT}
+      - ${SERVER_PORT}:${SERVER_PORT}
     expose:
-      - ${NGINX_PORT}
+      - ${SERVER_PORT}
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/site.conf.template:/etc/nginx/templates/site.conf.template:ro
