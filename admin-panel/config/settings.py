@@ -125,5 +125,6 @@ TINYMCE_DEFAULT_CONFIG = {
     'extended_valid_elements': (
         'a[href|target|data-id|class],span[class|tg-spoiler]'
     ),
-    'forced_root_block': False
+    'forced_root_block': False,
+    'entity_encoding': 'raw'
 }
