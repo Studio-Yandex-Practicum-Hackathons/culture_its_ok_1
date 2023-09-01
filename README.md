@@ -62,7 +62,7 @@ git clone git@github.com:Studio-Yandex-Practicum-Hackathons/culture_its_ok_1.git
 
 - Установите Docker согласно инструкции с официального сайта: _https://docs.docker.com/_
 - Получите все необходимые данные для переменных окружения: `telegram токен`, 
-`sentry dsn`, `info сервисного аккаунта Google`, `сслыку на форму опроса для web app`
+`sentry dsn`, `info сервисного аккаунта Google`, `сслыку на форму опроса для web app` (например, Google Forms. В целях пробного запуска можно указать любой URL)`
 
 
 - В папке infra/ создайте папку env с файлами переменных окружения (в качестве примера
@@ -96,12 +96,12 @@ DJANGO_PORT=8000
 
 TELEGRAM_TOKEN=<...>
 DEBUG=FALSE
-ADMIN_PASSWORD=password  # пароль от административной зоны
-READING_SPEED=250  # скорость чтения текста (слов в минуту)
-PHOTO_SHOW_DELAY=5  # задержка при показе фотографий (секунд)
-REFLECTION_TEXT_LIMIT=500  # предельная длина текста рефлексии (символов)
+ADMIN_PASSWORD=password     # пароль от административной зоны
+READING_SPEED=250           # скорость чтения текста (слов в минуту)
+PHOTO_SHOW_DELAY=5          # задержка при показе фотографий (секунд)
+REFLECTION_TEXT_LIMIT=500   # предельная длина текста рефлексии (символов)
 REFLECTION_VOICE_LIMIT=120  # предельная длина голосового сообщения рефлексии (секунд)
-SURVEY_URL=<...>  # ссылка на страницу опроса после завершения маршрута для отображения в web app
+SURVEY_URL=<...>            # ссылка на страницу опроса для отображения в web app
 ```
 ```
 # env/.django
@@ -165,18 +165,19 @@ docker compose --file=docker-compose-dev.yaml --env-file=env/.general up --build
 
 python manage.py createsuperuser
 ```
+Админка будет доступна по адресу: _http://<ip адрес сервера>/admin/_
 
 ## **Как наполнить базу**:
 
 * Из директории `/infra/data` скопируйте файл `routes.json` и папку `media` в контейнер Django:
 ```
-sudo docker compose --file=docker-compose-dev.yaml --env-file=env/.general cp data/routes.json django:/app/
+(sudo) docker compose --file=docker-compose-dev.yaml --env-file=env/.general cp data/routes.json django:/app/
 
-sudo docker compose --file=docker-compose-dev.yaml --env-file=env/.general cp data/media django:/app/
+(sudo) docker compose --file=docker-compose-dev.yaml --env-file=env/.general cp data/media django:/app/
 ```
 * Зайдите в контейнер Django под пользователем root и поменяйте права на папку `media`
 ```
-sudo docker compose --file=docker-compose-dev.yaml --env-file=env/.general exec -u root django bash
+(sudo) docker compose --file=docker-compose-dev.yaml --env-file=env/.general exec -u root django bash
 
 chown -R admin:admin media
 ```
@@ -184,11 +185,6 @@ chown -R admin:admin media
 ```
 python manage.py loaddata routes.json
 ```
-
-<br>
-
-Админка будет доступна по адресу: _http://<ip адрес сервера>/admin/_
-
 ___
 
 ## **Разработчики**:
