@@ -96,6 +96,11 @@ class GoogleSettings(EnvBase):
     ]
 
 
+class ServerSettings(EnvBase):
+    host: str = Field(alias='SERVER_HOST')
+    port: int = Field(alias='SERVER_PORT')
+
+
 class Settings(BaseSettings):
     bot: BotSettings = BotSettings()
     logging: LoggingSettings = LoggingSettings()
@@ -103,6 +108,7 @@ class Settings(BaseSettings):
     redis: RedisSettings = RedisSettings()
     sentry: SentrySettings = SentrySettings()
     google: GoogleSettings = GoogleSettings()
+    server: ServerSettings = ServerSettings()
 
 
 settings = Settings()

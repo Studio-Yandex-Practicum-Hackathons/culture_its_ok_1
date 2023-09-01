@@ -2,10 +2,15 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from enum import IntEnum
 
+from core.config import settings
 from core.utils import calc_avg, date_str_to_datetime
 from db.crud import progress_crud, reflection_crud, route_crud, user_crud
 from services.google_report import GoogleReport
 from sqlalchemy.ext.asyncio import AsyncSession
+
+VOICE_URL = f'http://{settings.server.host}:{settings.server.port}/media/voice/'  # noqa: E501
+
+TITLE_TEMPLATE = 'Отчёт по {} бота арт-медитации АНО "Культура"'
 
 
 class ReportType(IntEnum):
@@ -19,7 +24,7 @@ async def make_users_report(
         email: str,
         **kwargs
 ) -> str:
-    title = 'Отчёт по пользователям бота арт-медитации АНО "Культура"'
+    title = TITLE_TEMPLATE.format('пользователям')
     header = [
         [title],
         [],
@@ -51,7 +56,7 @@ async def make_routes_report(
 ) -> str:
     routes = await route_crud.get_all(session, sort='id asc')
 
-    title = 'Отчёт по маршрутам бота арт-медитации АНО "Культура"'
+    title = TITLE_TEMPLATE.format('маршрутам')
     header = [
         [title],
         [],
@@ -59,7 +64,7 @@ async def make_routes_report(
         [],
         *([f'Маршрут {i}', route.name] for i, route in enumerate(routes, 1)),
         [],
-        ['', *[f'Маршрут {i + 1}' for i in range(3)]]
+        ['', *[f'Маршрут {i}' for i in range(1, 4)]]
     ]
     rows = [
         ['Количество запусков бота'],
@@ -78,7 +83,7 @@ async def make_routes_report(
         )
 
         finished = [p for p in progress if p.finished_at]
-        finished_rate = round(len(finished) / len(progress) * 100, 0) if progress else 0  # noqa
+        finished_rate = round(len(finished) / len(progress) * 100, 0) if progress else 0  # noqa: E501
         unique_users = {p.user_id for p in progress}
         rates = [p.rating for p in progress if p.rating]
         route_running_m = [
@@ -109,7 +114,8 @@ async def make_reflection_report(
         **kwargs
 ) -> str:
     route = await route_crud.get(route_id, session)
-    title = 'Отчёт по рефлексии бота арт-медитации АНО "Культура"'
+
+    title = TITLE_TEMPLATE.format('рефлексии')
     header = [
         [title],
         [],
@@ -117,7 +123,7 @@ async def make_reflection_report(
         [],
         [f'Период: {start} - {end}'],
         [],
-        ['Текстовое содержимое рефлексии', 'Аудиофайл'],
+        ['Текстовый ответ пользователя', 'Голосовое сообщение пользователя'],
         [],
     ]
     rows = []
@@ -146,12 +152,14 @@ async def make_reflection_report(
 
         for question, answers in question_to_answers.items():
             rows.extend([
-                [question],
-                *[[answer[0], answer[1]] for answer in answers],
+                [],
+                [f'Вопрос: {question}'],
+                *[[answer[0], VOICE_URL + answer[1] if answer[1] else None]
+                  for answer in answers],
             ])
 
         rows.extend([
-            ['']
+            []
         ])
 
     report = GoogleReport()
