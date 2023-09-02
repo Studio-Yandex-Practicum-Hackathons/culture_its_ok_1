@@ -24,6 +24,11 @@ async def make_users_report(
         email: str,
         **kwargs
 ) -> str:
+    """
+    Формирует отчёт по пользователям в виде Google-таблицы, предоставляя доступ
+    заданному email.
+    :return: url на сформированный отчёт
+    """
     title = TITLE_TEMPLATE.format('пользователям')
     header = [
         [title],
@@ -54,6 +59,11 @@ async def make_routes_report(
         email: str,
         **kwargs
 ) -> str:
+    """
+    Формирует отчёт по пользователям за заданный период [start, end] в виде
+    Google-таблицы, предоставляя доступ заданному email.
+    :return: url на сформированный отчёт
+    """
     routes = await route_crud.get_all(session, sort='id asc')
 
     title = TITLE_TEMPLATE.format('маршрутам')
@@ -113,6 +123,11 @@ async def make_reflection_report(
         email: str,
         **kwargs
 ) -> str:
+    """
+    Формирует отчёт по пользователям для заданного route_id за заданный период
+    [start, end] в виде Google-таблицы, предоставляя доступ заданному email.
+    :return: url на сформированный отчёт
+    """
     route = await route_crud.get(route_id, session)
 
     title = TITLE_TEMPLATE.format('рефлексии')

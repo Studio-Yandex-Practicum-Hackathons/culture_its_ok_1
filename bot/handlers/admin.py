@@ -11,7 +11,7 @@ from core.utils import (check_is_email, date_str_to_datetime,
                         delete_inline_keyboard, delete_keyboard,
                         send_message_and_sleep)
 from db.crud import route_crud
-from keyboards.inline import get_inline_keyboard
+from keyboards import inline, reply
 from services.report import REPORT_TYPES, ReportType
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +23,8 @@ ENTER_INSTRUCTION = ('Для доступа в административную 
                      '/admin <i>ваш_пароль</i>')
 WRONG_PASSWORD = 'Неверный пароль'
 ADMIN_WELCOME = ('Добро пожаловать в административную зону. Для выхода из '
-                 'неё, введите команду /exit')
+                 'неё, нажмите кнопку в нижней части экрана')
+ADMIN_EXIT = 'Покинуть административную зону'
 ADMIN_EXIT_CONFIRMATION = 'Вы покинули административную зону'
 SELECT_REPORT = 'Выберите вид отчёта, который желаете получить.'
 SELECT_ROUTE = 'Выберите маршрут, по которому вы желаете получить отчёт.'
@@ -34,7 +35,8 @@ ENTER_PERIOD = ('Введите период, за который вы жела�
                 '<u>03.08.2023-12.08.2023</u> - получить отчёт за указанный '
                 'диапазон')
 BAD_DATE_FORMAT = 'Неверный формат даты.'
-BAD_PERIOD_RANGE = 'Дата начала не может быть позже сегодняшнего дня.'
+START_GT_END = 'Дата начала не может быть позже даты окончания.'
+START_GT_NOW = 'Дата начала или окончания не могут быть позже текущей даты.'
 ENTER_EMAIL = ('Введите адрес электронной почты, которому будет предоставлен '
                'доступ к отчёту.')
 BAD_EMAIL = 'Неверный формат адреса электронной почты.'
@@ -52,6 +54,7 @@ async def cmd_admin(
         state: context.FSMContext,
         command: CommandObject
 ):
+    """Обработчик входа в административную зону."""
     await state.clear()
 
     if command.args is None:
@@ -71,16 +74,21 @@ async def cmd_admin(
     # === точка входа в административную зону ===
     await message.delete()
     await delete_keyboard(message)
-    await send_message_and_sleep(message, ADMIN_WELCOME)
+    await send_message_and_sleep(
+        message,
+        ADMIN_WELCOME,
+        reply_markup=reply.get_reply_keyboard(ADMIN_EXIT, adjust=1)
+    )
     await admin_welcome(message, state)
 
 
-@router.message(Command('exit'))
+@router.message(F.text == 'Покинуть административную зону')
 @log_exceptions(logger)
 async def cmd_exit(
         message: types.Message,
         state: context.FSMContext
 ):
+    """Обработчик выхода из административной зоны."""
     await state.clear()
     await message.answer(ADMIN_EXIT_CONFIRMATION,
                          reply_markup=types.ReplyKeyboardRemove())
@@ -91,13 +99,15 @@ async def admin_welcome(
         message: types.Message,
         state: context.FSMContext,
 ):
+    """Выводит список доступных отчётов в виде инлайн клавиатуры, и переводит
+    состояние в ожидание выбора типа отчёта."""
     reports = {
         report['name']: f'report${report_id}'
         for report_id, report in REPORT_TYPES.items()
     }
     await message.answer(
         SELECT_REPORT,
-        reply_markup=get_inline_keyboard(reports, adjust=1)
+        reply_markup=inline.get_inline_keyboard(reports, adjust=1)
     )
     await state.set_state(Admin.report_selection)
 
@@ -109,6 +119,7 @@ async def report_selection(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Обработчик выбранного пользователем отчёта."""
     report_id = int(callback.data.split("$")[1])
 
     if report_id in REPORT_TYPES:
@@ -130,6 +141,8 @@ async def route_selection(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Выводит список доступных для отчёта маршрутов или обрабатывает
+    выбранный пользователем маршрут."""
     if await state.get_state() != Admin.route_selection:
         routes = {
             route.name: f'rpt_route${route.id}' for route in
@@ -137,7 +150,7 @@ async def route_selection(
         }
         await callback.message.answer(
             SELECT_ROUTE,
-            reply_markup=get_inline_keyboard(routes, adjust=1)
+            reply_markup=inline.get_inline_keyboard(routes, adjust=1)
         )
         await state.set_state(Admin.route_selection)
         return
@@ -162,6 +175,8 @@ async def period_selection(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Предлагает пользователю указать отчётный период или обрабатывает
+    выбранный пользователем период."""
     if await state.get_state() != Admin.period_selection:
         await message.answer(ENTER_PERIOD)
         await state.set_state(Admin.period_selection)
@@ -180,7 +195,11 @@ async def period_selection(
         return
 
     if start > end:
-        await message.answer(BAD_PERIOD_RANGE)
+        await message.answer(START_GT_END)
+        return
+
+    if start > datetime.now() or end > datetime.now():
+        await message.answer(START_GT_NOW)
         return
 
     await state.update_data({
@@ -197,6 +216,9 @@ async def email_input(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Предлагает пользователю указать email, которому будут выданы права на
+    сформированный отчёт или валидирует emai и генерирует отчёт, возвращая
+    его url."""
     if await state.get_state() != Admin.email_input:
         await message.answer(ENTER_EMAIL)
         await state.set_state(Admin.email_input)

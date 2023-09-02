@@ -111,7 +111,7 @@ async def route_selection(
         )
         return
 
-    # пользователь вводит произвольный текст, вместо выбора маршрута
+    # пользователь ввёл произвольный текст, вместо выбора маршрута
     spam_counter.increase()
     if spam_counter.is_exceeded():
         await message.answer(INSTRUCTION)
@@ -256,6 +256,9 @@ async def route_reflection(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Обработчик отправленной пользователем рефлексии (текстовые и голосовые
+    сообщения. Оба вида сообщения подвергаются обрезке, если превышают заданный
+    в приложении порог."""
     spam_counter.reset()
     if message.text:
         answer = message.text[:settings.bot.reflection_text_limit]
@@ -294,6 +297,10 @@ async def route_search(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Обработчик нажатия пользователем кнопок типа "Нашёл" и "Не могу найти"
+    (могут иметь иные подписи). В случае "Нашёл", снова запускается прохождение
+    маршрута. В противном случае пользователю выводится подсказка с
+    местонахождением следующего объекта."""
     spam_counter.reset()
     await delete_inline_keyboard(callback.message)
     await callback.answer()
@@ -324,6 +331,8 @@ async def route_quiz(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Обработчик прохождения (выбора любого варианта) пользователем
+    викторины."""
     spam_counter.reset()
     await state.set_state(Route.following)
     await route_follow(message, state, session)
@@ -336,12 +345,16 @@ async def route_rate(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Обработчик выставленной пользователем оценки маршрута, после его
+    прохождения. Также, функция выводит инлайн клавиатуру с формой опроса,
+    открывающейся в web app приложении."""
     spam_counter.reset()
     if await state.get_state() != Route.rate:
         await state.set_state(Route.rate)
         await answer_with_delay(message, state, RATE_ROUTE)
         return
 
+    # валидируем введённую пользователем оценку
     if (
         not message.text.isdecimal() or
         (int(message.text) < MIN_RATE or int(message.text) > MAX_RATE)

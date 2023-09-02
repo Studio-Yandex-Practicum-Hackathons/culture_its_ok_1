@@ -38,6 +38,8 @@ async def name_input(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Предлагает пользователю ввести его имя или валидирует и обрабатывает
+    введённое имя."""
     spam_counter.reset()
     if await state.get_state() != NewUser.name_input:
         await answer_with_delay(message, state, ACQUAINTANCE)
@@ -61,6 +63,8 @@ async def age_input(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Предлагает пользователю ввести его возраст или валидирует и обрабатывает
+    введённый возраст.."""
     spam_counter.reset()
     if await state.get_state() != NewUser.age_input:
         await answer_with_delay(message, state, ENTER_AGE)
@@ -85,6 +89,7 @@ async def hobby_input(
         state: context.FSMContext,
         session: AsyncSession
 ):
+    """Предлагает пользователю ввести его хобби или обрабатывает их."""
     spam_counter.reset()
     if await state.get_state() != NewUser.hobby_input:
         await answer_with_delay(message, state, ENTER_HOBBIES)
