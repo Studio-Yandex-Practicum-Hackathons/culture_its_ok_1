@@ -12,6 +12,7 @@ from redis.asyncio import Redis
 
 @log_exceptions(logger=logger_factory(__name__))
 async def main():
+    """Функция инициализации и запуска бота."""
     bot = Bot(token=settings.bot.telegram_token, parse_mode='html')
 
     dispatcher = Dispatcher(

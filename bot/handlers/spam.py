@@ -27,6 +27,8 @@ INSTRUCTION = (
 
 
 class Counter:
+    """Класс счётчика, используемый для подсчёта необработанных сообщений с
+     возможностью сброса и проверки, не превысил ли счётчик заданный порог."""
     def __init__(self, threshold: int):
         self.threshold = threshold
         self.counter = 0
@@ -47,6 +49,9 @@ spam_counter = Counter(MAX_ATTEMPTS)
 @router.message()
 @log_exceptions(logger)
 async def unexpected_message(message: types.Message):
+    """Обработчик всех сообщений, которые не были обработаны другими
+    роутерами. Т.е. сообщения, которые не должны быть обработаны логикой
+    бота."""
     spam_counter.increase()
 
     if spam_counter.is_exceeded():
@@ -56,6 +61,8 @@ async def unexpected_message(message: types.Message):
 @router.callback_query()
 @log_exceptions(logger)
 async def unexpected_callback(callback: types.CallbackQuery):
+    """Обработчик всех колбэков, которые не были обработаны другими роутерами.
+    Т.е. колбэки, которые не должны быть обработаны логикой бота."""
     spam_counter.increase()
 
     if spam_counter.is_exceeded():
