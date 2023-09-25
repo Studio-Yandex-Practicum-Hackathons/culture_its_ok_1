@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 VOICE_URL = f'http://{settings.server.host}:{settings.server.port}/media/voice/'  # noqa: E501
 
-TITLE_TEMPLATE = 'Отчёт по {} бота арт-медитации АНО "Культура"'
+TITLE_TEMPLATE = 'Отчёт по {} бота арт-медиации АНО "Культура"'
 
 
 class ReportType(IntEnum):
@@ -27,22 +27,26 @@ async def make_users_report(
     """
     Формирует отчёт по пользователям в виде Google-таблицы, предоставляя доступ
     заданному email.
-    :return: url на сформированный отчёт
+    :return: URL на сформированный отчёт
     """
-    title = TITLE_TEMPLATE.format('пользователям')
-    header = [
-        [title],
-        [],
-        ['Имя', 'Возраст', 'Интересы', 'Сколько раз воспользовались ботом'],
-    ]
-    rows = []
-
     users = await user_crud.get_all(session, sort='name asc')
+    rows = []
+    total_used_amount = 0
     for user in users:
         used_amount = await progress_crud.get_usage_count(user.id, session)
         rows.extend([
              [user.name, user.age, user.hobbies, used_amount]
         ])
+        total_used_amount += used_amount
+
+    title = TITLE_TEMPLATE.format('пользователям')
+    header = [
+        [title],
+        [],
+        ['Общее количество запусков бота', '', '', total_used_amount],
+        [],
+        ['Имя', 'Возраст', 'Интересы', 'Сколько раз воспользовались ботом']
+    ]
 
     report = GoogleReport()
     report.set_title(f'{title} от {datetime.now().strftime("%d.%m.%Y")}')
@@ -62,7 +66,7 @@ async def make_routes_report(
     """
     Формирует отчёт по пользователям за заданный период [start, end] в виде
     Google-таблицы, предоставляя доступ заданному email.
-    :return: url на сформированный отчёт
+    :return: URL на сформированный отчёт
     """
     routes = await route_crud.get_all(session, sort='id asc')
 
@@ -126,7 +130,7 @@ async def make_reflection_report(
     """
     Формирует отчёт по пользователям для заданного route_id за заданный период
     [start, end] в виде Google-таблицы, предоставляя доступ заданному email.
-    :return: url на сформированный отчёт
+    :return: URL на сформированный отчёт
     """
     route = await route_crud.get(route_id, session)
 
