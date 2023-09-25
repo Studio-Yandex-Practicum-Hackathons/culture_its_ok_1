@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Guide bot"
-description = "Бот для арт-медитации по объектам уличного искусства в Ростове-на-Дону"
+description = "Бот для арт-медиации по объектам уличного искусства в Ростове-на-Дону"
 version = "0.1.0"
 authors = ["dcomrad", "danlaryushin", "GUSICATC", "SergeychUK92", "STI-xa", "94R1K"]
 
