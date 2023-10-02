@@ -17,7 +17,7 @@ class CRUDProgress(CRUDBase):
                 self.model.user_id == user_id
             )
         )
-        return len(db_obj.scalars().all())
+        return len(db_obj.scalars().unique().all())
 
     async def get_all_by_route_and_date_range(
             self,
@@ -33,7 +33,7 @@ class CRUDProgress(CRUDBase):
                 self.model.started_at <= end,
             )
         )
-        return db_obj.scalars().all()
+        return db_obj.scalars().unique().all()
 
 
 progress_crud = CRUDProgress(Progress)
