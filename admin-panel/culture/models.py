@@ -247,3 +247,30 @@ class Reflection(models.Model):
         null=True,
         verbose_name='Аудиофайл рефлексии'
     )
+
+
+class Survey(models.Model):
+    progress = models.ForeignKey(
+        Progress,
+        on_delete=models.CASCADE,
+        verbose_name='Связанный прогресс'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания опроса'
+    )
+    most_memorable = models.TextField(
+        verbose_name='Какой объект Вам запомнился больше всего?',
+        blank=True,
+        null=True,
+    )
+    emotions = models.TextField(
+        verbose_name='Какие эмоции/размышления/ассоциации у Вас возникли по завершении маршрута?',  # noqa
+        blank=True,
+        null=True,
+    )
+    proposal = models.TextField(
+        verbose_name='Чего не хватило? Что можно улучшить на Ваш взгляд?',
+        blank=True,
+        null=True,
+    )

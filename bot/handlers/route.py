@@ -387,7 +387,9 @@ async def route_rate(
         FORM_OFFER,
         reply_markup=get_web_app_keyboard(
             WEB_APP_BUTTON_TEXT,
-            WebAppInfo(url=settings.bot.survey_url)
+            WebAppInfo(
+                url=settings.bot.survey_url.format(state_data['progress_id'])
+            )
         ),
     )
     await delete_inline_keyboard(form_offer, FORM_OFFER_TIME_LIMIT)

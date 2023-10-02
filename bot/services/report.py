@@ -4,7 +4,8 @@ from enum import IntEnum
 
 from core.config import settings
 from core.utils import calc_avg, date_str_to_datetime
-from db.crud import progress_crud, reflection_crud, route_crud, user_crud
+from db.crud import (progress_crud, reflection_crud, route_crud, survey_crud,
+                     user_crud)
 from services.google_report import GoogleReport
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +18,7 @@ class ReportType(IntEnum):
     USERS_REPORT = 1
     ROUTES_REPORT = 2
     REFLECTION_REPORT = 3
+    SURVEY_REPORT = 4
 
 
 async def make_users_report(
@@ -189,6 +191,59 @@ async def make_reflection_report(
     return await report.create()
 
 
+async def make_survey_report(
+        session: AsyncSession,
+        start: str,
+        end: str,
+        email: str,
+        **kwargs
+) -> str:
+    """
+    Формирует отчёт по пройденным опросам для заданного за заданный период
+    [start, end] в виде Google-таблицы, предоставляя доступ заданному email.
+    :return: URL на сформированный отчёт
+    """
+
+    questions = [
+        'Какой объект Вам запомнился больше всего?',
+        'Какие эмоции/размышления/ассоциации у Вас возникли по завершении маршрута?',  # noqa: E501
+        'Чего не хватило? Что можно улучшить на Ваш взгляд?',
+    ]
+
+    title = TITLE_TEMPLATE.format('опросам')
+    header = [
+        [title],
+        [],
+        [f'Период: {start} - {end}'],
+        [],
+        ['Маршрут', *questions],
+    ]
+    rows = []
+
+    surveys = await survey_crud.get_all_by_range(
+        date_str_to_datetime(start),
+        date_str_to_datetime(end) + timedelta(days=1),
+        session
+    )
+
+    for survey in surveys:
+        rows.extend([
+            [
+                survey.progress.route.name,
+                survey.most_memorable,
+                survey.emotions,
+                survey.proposal
+            ]
+        ])
+
+    report = GoogleReport()
+    report.set_title(f'{title} от {datetime.now().strftime("%d.%m.%Y")}')
+    report.set_header(header)
+    report.add_rows(rows)
+    report.set_email(email)
+    return await report.create()
+
+
 REPORT_TYPES = {
     ReportType.USERS_REPORT: dict(
         name='Отчёт по пользователям',
@@ -201,5 +256,9 @@ REPORT_TYPES = {
     ReportType.REFLECTION_REPORT: dict(
         name='Отчёт по рефлексии',
         handler=make_reflection_report
+    ),
+    ReportType.SURVEY_REPORT: dict(
+        name='Отчёт по опросам',
+        handler=make_survey_report
     )
 }

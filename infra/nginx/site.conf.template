@@ -8,6 +8,10 @@ server {
         proxy_pass http://${DJANGO_HOST}:${DJANGO_PORT}/admin/;
     }
 
+    location /survey/ {
+        proxy_pass http://${DJANGO_HOST}:${DJANGO_PORT}/survey/;
+    }
+
     location ~* \.(?:jpg|jpeg|gif|png|ico|css|js)$ {
         log_not_found off;
         expires 90d;
