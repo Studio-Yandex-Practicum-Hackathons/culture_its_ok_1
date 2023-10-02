@@ -111,6 +111,8 @@ class Progress(Base):
     finished_at = Column(DateTime(timezone=True))
     rating = Column(Integer)
 
+    route = relationship("Route", lazy="joined")
+
 
 class Reflection(Base):
     user_id = Column(ForeignKey('culture_user.id'))
@@ -120,3 +122,13 @@ class Reflection(Base):
     question = Column(Text, nullable=False)
     answer = Column(Text)
     voice = Column(String(255))
+
+
+class Survey(Base):
+    progress_id = Column(ForeignKey('culture_progress.id'))
+    created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.now)  # noqa:E501
+    most_memorable = Column(Text)
+    emotions = Column(Text)
+    proposal = Column(Text)
+
+    progress = relationship("Progress", lazy="joined")

@@ -39,7 +39,12 @@ class BotSettings(EnvBase):
     photo_show_delay: int
     reflection_text_limit: int
     reflection_voice_limit: int
-    survey_url: str
+    server_host: str
+    server_port: int
+
+    @property
+    def survey_url(self) -> str:
+        return f'https://{self.server_host}:{self.server_port}/survey/{{}}/'
 
 
 class LoggingSettings(EnvBase):
