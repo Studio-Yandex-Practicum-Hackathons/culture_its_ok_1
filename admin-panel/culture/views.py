@@ -12,7 +12,7 @@ def take_survey(request, progress_id: int):
     progress = get_object_or_404(Progress, id=progress_id)
 
     # проверяем, что пользователь ещё не проходил данный опрос
-    if Survey.objects.filter(progress_id=progress_id):
+    if Survey.objects.filter(progress_id=progress_id).exists():
         raise Http404
 
     # проверяем, что пользователь закончил маршрут недавно
