@@ -1,7 +1,0 @@
-TELEGRAM_TOKEN=6563654512:AAEKftqHjx80fCAPsGKwDIl627hPJ7Yy35E
-DEBUG=FALSE
-ADMIN_PASSWORD=WD7E12dYQHF7p3UnRaeO  # пароль от административной зоны
-READING_SPEED=250  # скорость чтения текста (слов в минуту)
-PHOTO_SHOW_DELAY=5  # задержка при показе фотографий (секунд)
-REFLECTION_TEXT_LIMIT=500  # предельная длина текста рефлексии (символов)
-REFLECTION_VOICE_LIMIT=120  # предельная длина голосового сообщения рефлексии (секунд)

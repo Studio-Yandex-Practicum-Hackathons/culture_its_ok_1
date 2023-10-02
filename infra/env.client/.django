@@ -1,4 +1,0 @@
-ALLOWED_HOSTS=127.0.0.1
-SECRET_KEY=django-insecure-8hbljh2uo1c9ctv409q!h%x6-gm^9c+jko)zy_-c-dd83i&-=v
-DEBUG=True
-PHOTO_RESIZE_QUALITY=medium  # качество сжатия картинок, загружаемых через админку (low/medium/high)
