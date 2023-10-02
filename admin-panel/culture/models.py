@@ -274,3 +274,11 @@ class Survey(models.Model):
         blank=True,
         null=True,
     )
+
+    MAX_TEXT_LENGTH = 500
+
+    def save(self, *args, **kwargs):
+        self.most_memorable = self.most_memorable[:self.MAX_TEXT_LENGTH]
+        self.emotions = self.emotions[:self.MAX_TEXT_LENGTH]
+        self.proposal = self.proposal[:self.MAX_TEXT_LENGTH]
+        super().save(*args, **kwargs)
