@@ -9,7 +9,7 @@ from db.crud import (progress_crud, reflection_crud, route_crud, survey_crud,
 from services.google_report import GoogleReport
 from sqlalchemy.ext.asyncio import AsyncSession
 
-VOICE_URL = f'http://{settings.server.host}:{settings.server.port}/media/voice/'  # noqa: E501
+VOICE_URL = f'https://{settings.server.host}/media/voice/'
 
 TITLE_TEMPLATE = 'Отчёт по {} бота арт-медиации АНО "Культура"'
 
