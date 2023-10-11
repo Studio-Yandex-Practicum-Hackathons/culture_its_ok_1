@@ -25,6 +25,13 @@ class Route(Base):
     _stages = relationship('RouteStage', lazy="joined",
                            order_by='asc(RouteStage.stage_priority)')
 
+    @property
+    def has_steps(self):
+        for stage in self.stages:
+            if stage.steps:
+                return True
+        return False
+
     def __repr__(self):
         return f'Маршрут ({self.name})'
 

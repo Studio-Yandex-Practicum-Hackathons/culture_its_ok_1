@@ -80,7 +80,7 @@ async def route_selection(
     routes = {
         route.name: route
         for route in db_routes[:3]
-        if any(route.stages)
+        if route.has_steps
     }
 
     if routes and await state.get_state() != Route.selection:
