@@ -77,9 +77,13 @@ async def route_selection(
         await answer_with_delay(message, state, NO_ROUTES)
         return
 
-    routes = {route.name: route for route in db_routes[:3] if route.stages}
+    routes = {
+        route.name: route
+        for route in db_routes[:3]
+        if any(route.stages)
+    }
 
-    if await state.get_state() != Route.selection:
+    if routes and await state.get_state() != Route.selection:
         await state.set_state(Route.selection)
         await answer_with_delay(
             message,
