@@ -1,4 +1,5 @@
-![Culture bot](https://github.com/Studio-Yandex-Practicum-Hackathons/culture_its_ok_1/actions/workflows/dev_workflows.yml/badge.svg)
+![Development](https://github.com/Studio-Yandex-Practicum-Hackathons/culture_its_ok_1/actions/workflows/dev_workflows.yml/badge.svg)
+![Production](https://github.com/Studio-Yandex-Practicum-Hackathons/culture_its_ok_1/actions/workflows/prod_workflows.yml/badge.svg)
 
 ## **Стек технологий**:
 ![image](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
