@@ -1,0 +1,59 @@
+name: Production
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+jobs:
+  build_and_push_to_docker_hub:
+      name: Push Docker image to Docker Hub
+      runs-on: ubuntu-latest
+
+      steps:
+      -
+        name: Check out the repo
+        uses: actions/checkout@v2
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Login to Docker
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.PROD_DOCKER_USERNAME }}
+          password: ${{ secrets.PROD_DOCKER_PASSWORD }}
+      -
+        name: Push Django application (admin panel) to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          context: admin-panel
+          push: true
+          tags: nsrnd/culture-admin:latest
+      -
+        name: Push bot application to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          context: bot
+          push: true
+          tags: nsrnd/culture-bot:latest
+
+  deploy:
+      name: Deploy to the remote server
+      runs-on: ubuntu-latest
+      needs: build_and_push_to_docker_hub
+
+      steps:
+      -
+        name: Executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          passphrase: ${{ secrets.PROD_SSH_PASSPHRASE }}
+          script: |
+            sudo docker pull nsrnd/culture-admin
+            sudo docker pull nsrnd/culture-bot
+            cd ~/infra
+            sudo docker compose --env-file=env/.general down
+            sudo docker compose --env-file=env/.general up -d
+            sudo docker image prune -f
