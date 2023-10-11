@@ -1,0 +1,8 @@
+TELEGRAM_TOKEN=<telegram token>
+DEBUG=FALSE
+ADMIN_PASSWORD=password  # пароль от административной зоны
+READING_SPEED=250  # скорость чтения текста (слов в минуту)
+PHOTO_SHOW_DELAY=5  # задержка при показе фотографий (секунд)
+REFLECTION_TEXT_LIMIT=500  # предельная длина текста рефлексии (символов)
+REFLECTION_VOICE_LIMIT=120  # предельная длина голосового сообщения рефлексии (секунд)
+SURVEY_URL=<survey url>  # ссылка на страницу опроса после завершения маршрута

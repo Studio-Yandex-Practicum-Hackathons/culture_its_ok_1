@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  postgres: 
+    image: postgres:${POSTGRES_VERSION}
+    container_name: culture-postgres
+    hostname: ${POSTGRES_HOST}
+    restart: on-failure
+    expose:
+      - ${POSTGRES_PORT}
+    volumes:
+      - culture_postgresql_data:/var/lib/postgresql/data/
+    env_file:
+      - ./env/.general
+      - ./env/.postgres
+
+  redis:
+    image: redis:${REDIS_VERSION}
+    container_name: culture-redis
+    hostname: ${REDIS_HOST}
+    restart: on-failure
+    expose:
+      - ${REDIS_PORT}
+    volumes:
+      - culture_redis_data:/data
+
+  nginx:
+    image: nginx:${NGINX_VERSION}
+    container_name: culture-nginx
+    hostname: ${NGINX_HOST}
+    restart: on-failure
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    expose:
+      - ${SERVER_PORT}
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/site.conf.template:/etc/nginx/templates/site.conf.template:ro
+      - culture_static_data:/data/static/
+      - culture_media_data:/data/media/
+    env_file:
+      - ./env/.general
+
+  django:
+    image: dcomrad/culture-admin
+    container_name: culture-admin
+    restart: on-failure
+    hostname: ${DJANGO_HOST}
+    depends_on:
+      - postgres
+    entrypoint: /app/docker-entrypoint.sh
+    expose:
+      - ${DJANGO_PORT}
+    volumes:
+      - culture_static_data:/app/static/
+      - culture_media_data:/app/media/
+    env_file:
+      - ./env/.general
+      - ./env/.django
+      - ./env/.postgres
+
+  bot:
+    image: dcomrad/culture-bot
+    container_name: culture-bot
+    restart: on-failure
+    depends_on:
+      - postgres
+    entrypoint: /app/docker-entrypoint.sh
+    volumes:
+      - culture_media_data:/app/media/
+    env_file:
+      - ./env/.general
+      - ./env/.bot
+      - ./env/.postgres
+      - ./env/.sentry
+      - ./env/.google
+
+volumes:
+  culture_postgresql_data:
+  culture_redis_data:
+  culture_static_data:
+  culture_media_data:

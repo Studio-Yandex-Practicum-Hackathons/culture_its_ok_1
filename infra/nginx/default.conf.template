@@ -1,0 +1,24 @@
+server {
+    listen ${SERVER_PORT};
+    server_name 127.0.0.1 localhost ${SERVER_HOST};
+
+    root /data;
+
+    location /admin/ {
+        proxy_pass http://${DJANGO_HOST}:${DJANGO_PORT}/admin/;
+    }
+
+    location /survey/ {
+        proxy_pass http://${DJANGO_HOST}:${DJANGO_PORT}/survey/;
+    }
+
+    location ~* \.(?:jpg|jpeg|gif|png|ico|css|js)$ {
+        log_not_found off;
+        expires 90d;
+    }
+
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+    error_page  500 502 503 504  /50x.html;
+}

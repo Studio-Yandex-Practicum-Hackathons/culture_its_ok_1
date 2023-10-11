@@ -1,0 +1,40 @@
+name: Development
+on:
+  push:
+    branches: [ "develop" ]
+  workflow_dispatch:
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+    - name: Install poetry
+      run: pip install poetry  
+    - name: Setup a local virtual environment (if no poetry.toml file)
+      run: |
+          poetry config virtualenvs.create true --local
+          poetry config virtualenvs.in-project true --local
+    - uses: actions/cache@v3
+      name: Define a cache for the virtual environment based on the dependencies lock file
+      with:
+          path: ./.venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+    - name: Install the project dependencies
+      run: poetry install    
+    - name: Add required packages
+      run: |
+          poetry add flake8
+          poetry add flake8-blind-except
+          poetry add flake8-broken-line
+          poetry add flake8-return
+          poetry add flake8-variables-names
+          poetry add pep8-naming
+          poetry add isort
+    - name: Run the tests
+      run: | 
+          poetry run python -m flake8
+          poetry run python -m isort . -c
